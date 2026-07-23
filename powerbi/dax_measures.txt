@@ -1,0 +1,163 @@
+UK Online Retail Dashboard — DAX Measures
+==========================================
+
+Create a table called _Measures first (Home ribbon > Calculations > New table).
+Note the leading underscore: Power BI reserves the exact name "Measures" for
+its own internal system table and will reject it if you try to name a table
+that yourself.
+
+_Measures = { "Measure holder" }
+
+Then add every measure below to that table (Home ribbon > Calculations >
+New measure, with _Measures selected in the Fields pane so they land in the
+right table).
+
+All measures below were checked against the CSVs in outputs/query_results/
+(exported from the SQL views) before being written up here — e.g. Net Sales
+should equal £8,911,407.90, the same figure in
+outputs/query_results/02_overall_kpis.csv.
+
+----------------------------------------------------------------------------
+Net Sales =
+SUM(vw_valid_sales[sales_value])
+
+What it calculates: total revenue from genuine completed sales.
+Why SUM: sales_value is already a per-line amount (quantity * unit_price),
+so this is a plain additive total — no need for CALCULATE or DISTINCTCOUNT.
+
+----------------------------------------------------------------------------
+Total Orders =
+DISTINCTCOUNT(vw_valid_sales[invoice_no])
+
+What it calculates: how many separate orders were placed.
+Why DISTINCTCOUNT: vw_valid_sales has one row per product line, so an order
+with 5 products appears as 5 rows. Counting rows would overcount orders;
+DISTINCTCOUNT collapses each invoice_no down to one, regardless of how many
+lines it has.
+
+----------------------------------------------------------------------------
+Unique Customers =
+DISTINCTCOUNT(vw_valid_sales[customer_id])
+
+What it calculates: how many distinct customers bought something in the
+current filter context.
+Why DISTINCTCOUNT: same reasoning as Total Orders — one customer can appear
+on many rows, and this needs the count of unique people, not rows.
+
+----------------------------------------------------------------------------
+Average Order Value =
+DIVIDE([Net Sales], [Total Orders], 0)
+
+What it calculates: average amount spent per order.
+Why DIVIDE: DIVIDE is a safe division — if [Total Orders] is 0 (e.g. an
+empty slicer selection), a plain "/" would throw a divide-by-zero error and
+break the visual; DIVIDE returns the third argument (0) instead.
+
+----------------------------------------------------------------------------
+Total Items Sold =
+SUM(vw_valid_sales[quantity])
+
+What it calculates: total units sold across all valid sales lines.
+Why SUM: quantity is already a per-line count, so this is a direct additive
+total, same logic as Net Sales.
+
+----------------------------------------------------------------------------
+Cancelled Value =
+SUM(vw_cancellations[cancellation_value])
+
+What it calculates: the total value of cancelled orders (invoices starting
+with C), kept as a positive number via ABS() in the SQL view.
+Why SUM: cancellation_value is a per-line amount, same as sales_value.
+
+----------------------------------------------------------------------------
+Cancelled Invoices =
+DISTINCTCOUNT(vw_cancellations[invoice_no])
+
+What it calculates: how many separate cancellation invoices were raised.
+Why DISTINCTCOUNT: same reasoning as Total Orders — one cancelled invoice
+can span several product lines.
+
+----------------------------------------------------------------------------
+Cancellation Rate =
+DIVIDE(
+    [Cancelled Invoices],
+    [Cancelled Invoices] + [Total Orders],
+    0
+)
+
+What it calculates: cancelled invoices as a share of all invoices raised
+(cancelled + valid). Format this measure as a percentage in Power BI.
+Why DIVIDE: same divide-by-zero protection as Average Order Value. Note:
+the plan's wireframe calls for a "Cancellation rate" KPI card on Page 3 but
+doesn't hand over ready-made DAX for it, so this measure was written to
+match the cancellation_rate_pct calculation in
+sql/04_sales_analysis.sql (17.15% on the full dataset) rather than invented
+from scratch.
+
+----------------------------------------------------------------------------
+High-Value Active Customers =
+CALCULATE(
+    COUNTROWS(vw_customer_profile),
+    vw_customer_profile[customer_segment] = "High-value active"
+)
+
+What it calculates: number of customers who are both high-spend and recently
+active (the two decisions a Sales Manager cares about most: who is valuable,
+and are they still buying).
+Why CALCULATE: vw_customer_profile has one row per customer already, so
+COUNTROWS gives a customer count directly, but it needs to be counted only
+within the "High-value active" segment — CALCULATE overrides the filter
+context to apply that condition regardless of what else is sliced on the
+page.
+
+----------------------------------------------------------------------------
+High-Value At-Risk Customers =
+CALCULATE(
+    COUNTROWS(vw_customer_profile),
+    vw_customer_profile[customer_segment] = "High-value at risk"
+)
+
+What it calculates: high-spend customers who haven't ordered in over 90 days
+relative to the dataset's last transaction — the retention priority list.
+Why CALCULATE: same reasoning as High-Value Active Customers, filtered to a
+different segment value.
+
+----------------------------------------------------------------------------
+At-Risk Repeat Customers =
+CALCULATE(
+    COUNTROWS(vw_customer_profile),
+    vw_customer_profile[customer_segment] = "At-risk repeat customer"
+)
+
+What it calculates: repeat customers (2+ orders) below the £1,000 high-value
+threshold who have also gone quiet for 90+ days.
+Why CALCULATE: same pattern again, filtered to the "At-risk repeat customer"
+segment.
+
+----------------------------------------------------------------------------
+One-Time Customers =
+CALCULATE(
+    COUNTROWS(vw_customer_profile),
+    vw_customer_profile[customer_segment] = "One-time customer"
+)
+
+What it calculates: customers who have only ever placed a single order.
+Why CALCULATE: the plan's Page 2 KPI row calls for "One-Time Customers" as
+the fourth card alongside the three segment measures above, but the plan's
+DAX section doesn't provide it — this one was added to complete the set,
+following the exact same CALCULATE + COUNTROWS pattern as the other three
+segment measures for consistency.
+
+============================================================================
+Measure -> KPI card mapping (so nothing gets missed while building the report)
+============================================================================
+
+Page 1 - Sales overview:
+  Net Sales, Total Orders, Unique Customers, Average Order Value
+
+Page 2 - Customer retention:
+  High-Value Active Customers, High-Value At-Risk Customers,
+  At-Risk Repeat Customers, One-Time Customers
+
+Page 3 - Cancellations and products:
+  Cancelled Invoices, Cancelled Value, Cancellation Rate

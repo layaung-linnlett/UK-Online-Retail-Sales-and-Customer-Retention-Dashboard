@@ -1,0 +1,6 @@
+customer_segment,customers,total_sales,average_customer_spend
+High-value active,1399,7125379.57,5093.19
+One-time customer,1493,616311.73,412.80
+Active repeat customer,844,491584.69,582.45
+High-value at risk,195,471684.33,2418.89
+At-risk repeat customer,407,206447.58,507.24

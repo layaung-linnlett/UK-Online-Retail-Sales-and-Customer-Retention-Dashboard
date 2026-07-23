@@ -1,0 +1,29 @@
+# Data files
+data/*.csv
+data/*.xlsx
+data/*.xls
+
+# Power BI backups and local files
+powerbi/*.pbix
+powerbi/*.pbit
+powerbi/*.zip
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Personal interview prep notes - not part of the public project
+STUDY_GUIDE.md
+# Claude Code local tooling config
+.claude/
