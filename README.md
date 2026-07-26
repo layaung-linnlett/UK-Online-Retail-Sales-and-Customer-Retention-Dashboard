@@ -71,13 +71,15 @@ I did the cleaning as SQL views rather than editing the raw table, so the origin
 
 ## Key insights and recommendations
 
-| # | Insight | Headline number | Recommended action |
+| Priority | Insight | Headline number | Recommended action |
 |---|---|---|---|
 | 1 | High-value customers gone quiet | **195** customers, **£471,684.33** at risk | Direct, personalised re-engagement |
-| 2 | Sales are sharply seasonal | **2.6x** swing, Feb → Nov | Weight stock & marketing to Q4 |
-| 3 | International revenue is concentrated | 4 markets = most non-UK sales | Deepen NL/EIRE/DE/FR before expanding |
-| 4 | Cancellations are material | **17.15%** rate, **£896,812.49** | Investigate Dec spike; fix fee mislabeling |
-| 5 | A third of customers never came back | **1,493** one-time buyers (34%) | Test a second-purchase incentive |
+| 2 | Cancellations are material | **17.15%** rate, **£896,812.49** | Investigate Dec spike; fix fee mislabeling |
+| 3 | A third of customers never came back | **1,493** one-time buyers (34%) | Test a second-purchase incentive |
+| 4 | Sales are sharply seasonal | **2.6x** swing, Feb → Nov | Weight stock & marketing to Q4 |
+| 5 | International revenue is concentrated | 4 markets = most non-UK sales | Deepen NL/EIRE/DE/FR before expanding |
+
+Ranked by a rough effort-vs-impact call, not just headline size: #1 is a ready-to-run list needing no new process, so it's the fastest win. #2 needs investigating before it can be fixed, but the potential recovery is large. #3 is broad reach but needs a new incentive to be built. #4 is mostly a planning/operations fix rather than new revenue. #5 needs marketing spend and a longer payback horizon, so it's last despite being a genuine opportunity.
 
 ### 1. 195 high-value customers have gone quiet — £471,684.33 sitting idle
 
@@ -85,39 +87,49 @@ Customers who've placed 2+ orders and spent £1,000+ historically, but haven't b
 
 - **Evidence:** Customer Retention page, High-Value At-Risk table. Worst two: customer `15749.0` (£44,534.30 lifetime, silent for 235 days) and `15098.0` (£39,916.50, silent for 182 days).
 - **Why it matters:** These are proven repeat spenders, not casual shoppers — losing one is worth far more than losing a one-time buyer.
+- **Potential upside:** If even 20% of these 195 customers return and spend at their historical average again (£2,418.89 each), that's roughly **£94,337** recovered — a rough illustration of scale, not a forecast.
 - **Recommended action:** Work this exact list top-down for personal re-engagement (account manager call, tailored offer), not a generic email blast.
+- **How I'd measure success:** Re-contact rate and repeat-purchase rate within 30 days of outreach, tracked against this specific list of 195 customer IDs.
 
-### 2. Sales swing 2.6x across the year, peaking right before Christmas
-
-Net sales climb from a February low of £447,137.35 to a November peak of £1,161,817.38 — November alone grew 11.79% on October.
-
-- **Evidence:** Sales Overview page, Monthly Net Sales Trend and month-on-month growth.
-- **Why it matters:** This is a UK gift retailer — the autumn ramp-up is pre-Christmas ordering. The apparent December drop is just the dataset ending on the 9th, not falling demand.
-- **Recommended action:** Weight stock, staffing and marketing spend toward Q4, and caveat any December figures as a partial month in future reporting.
-
-### 3. International growth is sitting in 4 markets, not spread thin
-
-The Netherlands, EIRE, Germany and France drive the bulk of non-UK revenue — the Netherlands' £285,446.34 comes from just 9 customers.
-
-- **Evidence:** Sales Overview page, Top International Countries chart.
-- **Why it matters:** Revenue outside the UK is concentrated in a handful of accounts per country — fragile if a few are lost, but also proof these markets already convert, so there's room to add more customers rather than find new countries.
-- **Recommended action:** Prioritise acquisition spend in these four proven markets before testing unproven ones.
-
-### 4. Cancellations cost £896,812.49 — and one "cancelled product" isn't a product at all
+### 2. Cancellations cost £896,812.49 — and one "cancelled product" isn't a product at all
 
 3,836 cancelled invoices, a 17.15% cancellation rate (roughly 1 in 6), with cancelled value spiking to £205,124.67 in December 2011 alone — over double any other month.
 
 - **Evidence:** Cancellations page, KPI cards and Cancelled Value by Month.
 - **Why it matters:** The single biggest line on the Top Cancelled Products chart is **"AMAZON FEE"** (£235,281.59 across 32 invoices) — a marketplace fee adjustment, not a real customer return, recorded under the same cancellation-style invoice number as genuine cancellations (alongside "Manual", "CRUK Commission", "Bank Charges"). Taking that chart at face value would be misleading.
+- **Potential upside:** The other 12 months average £57,640.65 in cancelled value each. December alone is **£147,484.02** above that average — if whatever caused the December spike were brought under control, that's roughly the annual saving available.
 - **Recommended action:** Investigate the December spike specifically rather than assuming it's routine seasonality, and flag to the data owner that fee adjustments and genuine returns need separating at the source.
+- **How I'd measure success:** Cancellation rate for December specifically, tracked against the non-December monthly average, in the following year's data.
 
-### 5. 34% of customers bought once and never came back
+### 3. 34% of customers bought once and never came back
 
-1,493 one-time customers average just £412.80 each, versus £5,093.19 for the 1,399 "high-value active" customers.
+1,493 one-time customers average just £412.80 each, versus £582.45 for "Active repeat customers" and £5,093.19 for "High-value active" customers.
 
 - **Evidence:** Customer Retention page, Customer Count by Segment.
 - **Why it matters:** A third of the customer base already cleared the hardest hurdle — the first purchase — and simply never returned.
-- **Recommended action:** Test a targeted second-purchase incentive shortly after a customer's first order, and track how many convert into repeat buyers.
+- **Potential upside:** Converting just 10% of these 1,493 customers (around 149 people) up to the £582.45 average spend of an "Active repeat customer" would add roughly **£25,329** in incremental revenue — again, an illustration of scale from real averages, not a guaranteed number.
+- **Recommended action:** Test a targeted second-purchase incentive shortly after a customer's first order.
+- **How I'd measure success:** % of first-time customers who place a second order within 60 days, before vs. after the incentive is introduced.
+
+### 4. Sales swing 2.6x across the year, peaking right before Christmas
+
+Net sales climb from a February low of £447,137.35 to a November peak of £1,161,817.38 — November alone grew 11.79% on October.
+
+- **Evidence:** Sales Overview page, Monthly Net Sales Trend and month-on-month growth.
+- **Why it matters:** This is a UK gift retailer — the autumn ramp-up is pre-Christmas ordering. The apparent December drop is just the dataset ending on the 9th, not falling demand.
+- **Potential upside:** This isn't about new revenue so much as protecting existing revenue — under-stocking or under-staffing during the September–November ramp-up risks constraining sales right at the £1.16M peak.
+- **Recommended action:** Weight stock, staffing and marketing spend toward Q4, and caveat any December figures as a partial month in future reporting.
+- **How I'd measure success:** Stockout/out-of-stock incidents during Sept–Nov, and whether next year's Nov growth rate matches or beats this year's 11.79%.
+
+### 5. International growth is sitting in 4 markets, not spread thin
+
+The Netherlands, EIRE, Germany and France drive the bulk of non-UK revenue — the Netherlands' £285,446.34 comes from just 9 customers.
+
+- **Evidence:** Sales Overview page, Top International Countries chart.
+- **Why it matters:** Revenue outside the UK is concentrated in a handful of accounts per country — fragile if a few are lost, but also proof these markets already convert, so there's room to add more customers rather than find new countries.
+- **Potential upside:** Growing the Netherlands' customer base by 50% (9 to roughly 14 customers) at a similar average value per customer could add in the region of **£142,723** — illustrative, since customer acquisition doesn't scale this evenly in practice.
+- **Recommended action:** Prioritise acquisition spend in these four proven markets before testing unproven ones.
+- **How I'd measure success:** Customer count growth in these four markets specifically, tracked quarterly against acquisition spend.
 
 ## Limitations
 
