@@ -71,30 +71,53 @@ I did the cleaning as SQL views rather than editing the raw table, so the origin
 
 ## Key insights and recommendations
 
-**Finding:** A small group of high-value repeat customers has gone quiet. 195 customers meet the "high-value" bar (2+ orders, £1,000+ lifetime spend) but haven't ordered in over 90 days, together worth £471,684.33 in historical spend — about 5.3% of total net sales sitting with customers who've stopped buying.
-**Evidence:** Customer Retention page, "High-Value At-Risk Customers" KPI and table. Top of that list: customer 15749.0 (£44,534.30 lifetime spend, last order 235 days before the dataset ends) and 15098.0 (£39,916.50, 182 days quiet).
-**Business implication:** These aren't casual shoppers — they've already proven they'll place multiple large orders. Losing them permanently is a bigger revenue risk than losing a one-time buyer.
-**Recommended action:** The Sales Manager should prioritise this exact list for direct, personalised re-engagement (account manager call, a tailored offer) rather than a generic marketing blast, starting with the highest-spend names at the top of the table.
+| # | Insight | Headline number | Recommended action |
+|---|---|---|---|
+| 1 | High-value customers gone quiet | **195** customers, **£471,684.33** at risk | Direct, personalised re-engagement |
+| 2 | Sales are sharply seasonal | **2.6x** swing, Feb → Nov | Weight stock & marketing to Q4 |
+| 3 | International revenue is concentrated | 4 markets = most non-UK sales | Deepen NL/EIRE/DE/FR before expanding |
+| 4 | Cancellations are material | **17.15%** rate, **£896,812.49** | Investigate Dec spike; fix fee mislabeling |
+| 5 | A third of customers never came back | **1,493** one-time buyers (34%) | Test a second-purchase incentive |
 
-**Finding:** Sales are heavily seasonal, climbing steadily from a low in February (£447,137.35) to a peak in November (£1,161,817.38) — a 2.6x swing across the year — before the visible December figure drops, which reflects the dataset simply ending on 9 December rather than a genuine sales collapse.
-**Evidence:** Sales Overview page, Monthly Net Sales Trend chart and the month-on-month growth figures behind it (November alone grew 11.79% on October).
-**Business implication:** This is a UK gift retailer, so the autumn build-up into November is almost certainly pre-Christmas ordering. Stock, staffing and marketing spend should already be weighted toward Q4, and the "December drop" should not be read as a demand problem when reporting on it.
-**Recommended action:** Plan inventory and campaign timing around the September–November ramp-up specifically, and caveat any December figures in future reporting as a partial month, not a real decline.
+### 1. 195 high-value customers have gone quiet — £471,684.33 sitting idle
 
-**Finding:** Beyond the UK (which drives £7,308,391.55 of the £8.91M total), the Netherlands, EIRE, Germany and France are the strongest international markets, together generating the bulk of non-UK revenue from a comparatively tiny number of customers — e.g. the Netherlands' £285,446.34 comes from just 9 customers.
-**Evidence:** Sales Overview page, Top International Countries chart and Sales by Country table.
-**Business implication:** International revenue is currently concentrated in a handful of accounts per country rather than broad-based demand, meaning it's fragile (a couple of lost accounts could visibly dent a country's numbers) but also under-tapped — there's room to grow the customer count in these already-proven markets rather than needing to find new ones from scratch.
-**Recommended action:** Focus international growth effort on deepening the Netherlands, EIRE, Germany and France markets (e.g. targeted acquisition in those four) before spending budget testing new, unproven countries.
+Customers who've placed 2+ orders and spent £1,000+ historically, but haven't bought anything in over 90 days.
 
-**Finding:** Cancellations are a genuinely material cost, not a rounding error — 3,836 cancelled invoices worth £896,812.49, a 17.15% cancellation rate (roughly 1 in 6 invoices raised). Cancelled value also spikes sharply in December 2011 (£205,124.67, more than double any other month).
-**Evidence:** Cancellations page, KPI cards and Cancelled Value by Month chart.
-**Business implication:** Cancellations are too large to ignore in reporting, and the December spike deserves investigation — it could be genuine holiday-period returns, or it could partly be the same "partial month" effect distorting the sales trend. Separately, the single biggest line on the "Top Cancelled Products" chart is "AMAZON FEE" (£235,281.59 across just 32 invoices), which isn't a real product cancellation at all — it's almost certainly a marketplace fee adjustment that happened to get recorded with a cancellation-style invoice number, alongside similar non-product entries ("Manual", "CRUK Commission", "Bank Charges").
-**Recommended action:** Investigate the December cancellation spike specifically before assuming it's a seasonal pattern. Separately, flag to whoever maintains this data that fee/administrative adjustments and genuine customer product returns are being recorded under the same invoice convention — splitting them would make this chart trustworthy at face value instead of needing a manual caveat.
+- **Evidence:** Customer Retention page, High-Value At-Risk table. Worst two: customer `15749.0` (£44,534.30 lifetime, silent for 235 days) and `15098.0` (£39,916.50, silent for 182 days).
+- **Why it matters:** These are proven repeat spenders, not casual shoppers — losing one is worth far more than losing a one-time buyer.
+- **Recommended action:** Work this exact list top-down for personal re-engagement (account manager call, tailored offer), not a generic email blast.
 
-**Finding:** One-time customers are the second-largest segment by headcount (1,493 customers, 34.4% of the 4,338 identified customers) but contribute comparatively little revenue (£616,311.73, an average of just £412.80 each) next to the 1,399 "High-value active" customers who average £5,093.19 each.
-**Evidence:** Customer Retention page, Customer Count by Segment chart and segment summary.
-**Business implication:** A third of the customer base has only ever bought once. Converting even a modest share of these into a second purchase would likely be cheaper than acquiring a brand-new customer, since they're already past the first-purchase hurdle.
-**Recommended action:** Test a simple second-purchase incentive (e.g. a follow-up discount or product recommendation) aimed specifically at one-time customers shortly after their first order, and track whether it moves people into the "Active repeat customer" segment.
+### 2. Sales swing 2.6x across the year, peaking right before Christmas
+
+Net sales climb from a February low of £447,137.35 to a November peak of £1,161,817.38 — November alone grew 11.79% on October.
+
+- **Evidence:** Sales Overview page, Monthly Net Sales Trend and month-on-month growth.
+- **Why it matters:** This is a UK gift retailer — the autumn ramp-up is pre-Christmas ordering. The apparent December drop is just the dataset ending on the 9th, not falling demand.
+- **Recommended action:** Weight stock, staffing and marketing spend toward Q4, and caveat any December figures as a partial month in future reporting.
+
+### 3. International growth is sitting in 4 markets, not spread thin
+
+The Netherlands, EIRE, Germany and France drive the bulk of non-UK revenue — the Netherlands' £285,446.34 comes from just 9 customers.
+
+- **Evidence:** Sales Overview page, Top International Countries chart.
+- **Why it matters:** Revenue outside the UK is concentrated in a handful of accounts per country — fragile if a few are lost, but also proof these markets already convert, so there's room to add more customers rather than find new countries.
+- **Recommended action:** Prioritise acquisition spend in these four proven markets before testing unproven ones.
+
+### 4. Cancellations cost £896,812.49 — and one "cancelled product" isn't a product at all
+
+3,836 cancelled invoices, a 17.15% cancellation rate (roughly 1 in 6), with cancelled value spiking to £205,124.67 in December 2011 alone — over double any other month.
+
+- **Evidence:** Cancellations page, KPI cards and Cancelled Value by Month.
+- **Why it matters:** The single biggest line on the Top Cancelled Products chart is **"AMAZON FEE"** (£235,281.59 across 32 invoices) — a marketplace fee adjustment, not a real customer return, recorded under the same cancellation-style invoice number as genuine cancellations (alongside "Manual", "CRUK Commission", "Bank Charges"). Taking that chart at face value would be misleading.
+- **Recommended action:** Investigate the December spike specifically rather than assuming it's routine seasonality, and flag to the data owner that fee adjustments and genuine returns need separating at the source.
+
+### 5. 34% of customers bought once and never came back
+
+1,493 one-time customers average just £412.80 each, versus £5,093.19 for the 1,399 "high-value active" customers.
+
+- **Evidence:** Customer Retention page, Customer Count by Segment.
+- **Why it matters:** A third of the customer base already cleared the hardest hurdle — the first purchase — and simply never returned.
+- **Recommended action:** Test a targeted second-purchase incentive shortly after a customer's first order, and track how many convert into repeat buyers.
 
 ## Limitations
 
