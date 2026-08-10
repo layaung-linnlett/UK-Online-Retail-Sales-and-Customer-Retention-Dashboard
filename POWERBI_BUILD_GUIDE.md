@@ -82,7 +82,7 @@ _Measures = { "Measure holder" }
 
 ## 7. Add every measure
 
-Open [powerbi/dax_measures.txt](powerbi/dax_measures.txt) — it has all eleven measures with the exact DAX and an explanation of what each one does and why it uses DIVIDE/CALCULATE/DISTINCTCOUNT.
+Open [powerbi/dax_measures.txt](powerbi/dax_measures.txt) — it has all twelve measures with the exact DAX and an explanation of what each one does and why it uses DIVIDE/CALCULATE/DISTINCTCOUNT.
 
 For each measure:
 
