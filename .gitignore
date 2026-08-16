@@ -27,3 +27,9 @@ Thumbs.db
 STUDY_GUIDE.md
 # Claude Code local tooling config
 .claude/
+
+# Personal learning notes - never publish
+CLAUDE.md
+.ipynb_checkpoints/
+
+# Files over ~50 MB should not be committed - use Git LFS or a download step instead.

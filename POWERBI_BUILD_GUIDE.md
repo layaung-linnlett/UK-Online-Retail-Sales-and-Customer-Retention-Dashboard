@@ -90,7 +90,7 @@ For each measure:
 2. **Home** ribbon (Calculations group) > **New measure**.
 3. Delete the placeholder text in the formula bar and paste in the measure name and DAX from `dax_measures.txt` exactly (e.g. `Net Sales = SUM(vw_valid_sales[sales_value])`).
 4. Press Enter.
-5. Repeat for all eleven: Net Sales, Total Orders, Unique Customers, Average Order Value, Total Items Sold, Cancelled Value, Cancelled Invoices, Cancellation Rate, High-Value Active Customers, High-Value At-Risk Customers, At-Risk Repeat Customers, One-Time Customers.
+5. Repeat for all twelve: Net Sales, Total Orders, Unique Customers, Average Order Value, Total Items Sold, Cancelled Value, Cancelled Invoices, Cancellation Rate, High-Value Active Customers, High-Value At-Risk Customers, At-Risk Repeat Customers, One-Time Customers.
 
 **Formatting while you're in there:**
 - Net Sales, Average Order Value, Cancelled Value: select the measure, go to the **Measure tools** ribbon, set **Format** to Currency, symbol £, 2 decimal places (or 0 for card visuals if you want cleaner KPI numbers).
@@ -264,6 +264,6 @@ If the four segment counts don't sum to 4,338 (the total unique-customer count f
 
 ## After all three pages are built
 
-1. Save the file as `powerbi/Online_Retail_Dashboard.pbix` (this file is git-ignored per `.gitignore` — Power BI files are large binaries and don't belong in the repo history; the screenshot in `images/` is what actually gets committed for the README).
-2. Take a screenshot of each page (or just Page 1) and save it to `images/dashboard_screenshot.png` for the README.
-3. Once you've actually looked at the finished dashboard, go fill in the **Key Insights and Recommendations** section of `README.md` — it's deliberately left as a TODO. Use the Finding / Evidence / Business implication / Recommended action format described in the project plan, and ground every finding in a number you can point to on the dashboard or in `outputs/query_results/`.
+1. Save the file as `powerbi/Online_Retail_Dashboard.pbix` (this file is git-ignored per `.gitignore` — Power BI files are large binaries and don't belong in the repo history; the screenshots in `outputs/figures/` is what actually gets committed for the README).
+2. Take a screenshot of each page and save them to `outputs/figures/` as `page1_sales_overview.jpg`, `page2_customer_retention.jpg` and `page3_cancellations_products.jpg` — these are the three the README embeds.
+3. Once you've actually looked at the finished dashboard, write up the **Key Findings** section of `README.md` in the Finding / Evidence / Why it matters / Recommended action format, grounding every finding in a number you can point to on the dashboard or in `outputs/query_results/`. That section is now filled in, so treat this step as the process to repeat if the data is ever refreshed.

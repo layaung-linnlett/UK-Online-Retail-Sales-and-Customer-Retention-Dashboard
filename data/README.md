@@ -19,7 +19,7 @@ https://doi.org/10.24432/C5BW33
 3. Run the Python script:
 
 ```bash
-python python/01_excel_to_csv.py
+python src/01_excel_to_csv.py
 ```
 
 4. The script creates `online_retail.csv` in this folder.
