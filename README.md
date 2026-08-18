@@ -1,7 +1,3 @@
-Yes. Your current README has **good analysis**, but it reads more like a consulting report than a graduate portfolio project. There are also a few places where the wording is more complicated than it needs to be.
-
-I would keep your numbers and analytical honesty, but make the writing **simpler, more direct, and more like a graduate explaining their own project**.
-
 # UK Online Retail: Sales and Customer Retention Dashboard
 
 A three-page Power BI dashboard built from **541,909 UK retail transactions**. I used PostgreSQL and SQL to clean and analyse the data, then built the dashboard in Power BI to look at sales, customers, retention, cancellations and product demand.
