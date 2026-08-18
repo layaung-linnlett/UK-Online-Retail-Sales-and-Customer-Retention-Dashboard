@@ -10,7 +10,7 @@ One of the main findings was that **195 high-value repeat customers had not purc
 | -------- | ------------------------------------- | --------------------------------------: | ----------------------------------------------------------------------------------- |
 | 1        | High-value customers have gone quiet  |         **195 customers / £471,684.33** | Target them with personalised re-engagement                                         |
 | 2        | Cancellations are a significant issue |                **17.15% / £896,812.49** | Investigate the December spike and separate fee adjustments from real cancellations |
-| 3        | Many customers only purchased once    |               **1,493 customers / 34%** | Test an incentive to encourage a second purchase                                    |
+| 3        | Many customers only purchased once    |               **1,493 customers / 34%** | Test an incentive to encourage a second purchase  rather than acquiring new customers with more marketing spend                                   |
 | 4        | Sales are strongly seasonal           | **2.6× difference** between Feb and Nov | Plan stock and staffing around the Q4 increase                                      |
 | 5        | International sales are concentrated  |          Mainly **NL, EIRE, DE and FR** | Focus on markets that already have demand                                           |
 
