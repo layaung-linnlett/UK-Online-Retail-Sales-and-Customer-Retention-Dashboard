@@ -9,14 +9,16 @@ One of the main findings was that **195 high-value repeat customers had not purc
 | Priority | Finding                               |                                  Number | Possible action                                                                     |
 | -------- | ------------------------------------- | --------------------------------------: | ----------------------------------------------------------------------------------- |
 | 1        | High-value customers have gone quiet  |         **195 customers / £471,684.33** | Target them with personalised re-engagement                                         |
-| 2        | Cancellations are a significant issue |                **17.15% / £896,812.49** | Investigate the December spike and separate fee adjustments from real cancellations |
+| 2        | Almost half of "cancellations" are not returns |                **£411k of £896,812.49** | Finance to code fees separately, so the returns figure reflects actual returns      |
 | 3        | Many customers only purchased once    |               **1,493 customers / 34%** | Test an incentive to encourage a second purchase  rather than acquiring new customers with more marketing spend                                   |
 | 4        | Sales are strongly seasonal           | **2.6× difference** between Feb and Nov | Plan stock and staffing around the Q4 increase                                      |
-| 5        | International sales are concentrated  |          Mainly **NL, EIRE, DE and FR** | Focus on markets that already have demand                                           |
+| 5        | International sales are concentrated  |    **£551k from 12 customers** in NL and EIRE | Protect NL and EIRE as key accounts; grow DE and FR as markets                      |
 
 I ranked these based on a simple effort-versus-impact judgement rather than just choosing the biggest number.
 
-The high-value customer list is the quickest opportunity because the customers can already be identified from the data. Cancellations could have a larger financial impact, but they need further investigation before deciding what action to take.
+The high-value customer list is the quickest opportunity because the customers can already be identified from the data. Cancellations matter for a different reason: the reported figure is measuring two different things at once, so the first job there is correcting the number rather than acting on it.
+
+Some of the figures in this README differ from the ones shown in the dashboard screenshots. That is deliberate. I found several issues after the report was built and chose to document them rather than quietly restate the numbers — see [Known issues found after the dashboard was built](#known-issues-found-after-the-dashboard-was-built).
 
 ---
 
@@ -47,7 +49,11 @@ This is only an example to show the size of the opportunity. It is **not a forec
 
 ### What I would do
 
-I would start with this list and contact the highest-value customers first, using a personalised message or offer rather than sending the same promotion to everyone.
+**This changes where the retention budget goes.** Instead of spreading it across all 4,338 customers or sending one promotion to everyone, it concentrates on the **4.5% of the customer base that holds £471,684.33 of already-proven spend.**
+
+The scale is easier to judge as a comparison. At the average first order value of £412.80, recovering these 195 customers is worth roughly **1,143 brand-new customers** — and it is a call list one account manager can work through in a fortnight, not a campaign that has to be built first.
+
+I would work the list top-down by lifetime value, with a personalised message or offer rather than the same promotion to everyone.
 
 ### How I would measure it
 
@@ -59,43 +65,56 @@ Track:
 
 ---
 
-## 2. Cancellations total £896,812.49
+## 2. Almost half of the £896,812.49 in "cancellations" are not customer returns
 
-There were **3,836 cancelled invoices**, representing **17.15% of invoices** and **£896,812.49** in cancelled value.
+There were **3,836 cancelled invoices** worth **£896,812.49** in total. But **£410,747.67 of that — 45.8% — is not a customer returning anything.**
 
-The biggest issue was December 2011, when cancelled value reached **£205,124.67**.
+The largest item in the cancelled-product chart is **"AMAZON FEE"**, with **£235,281.59 across 32 invoices**. It is a marketplace fee adjustment, not a return. The same is true of other entries:
 
-That is more than twice the value recorded in any other month.
-
-### An important data quality issue
-
-The largest item in the cancelled-product chart is **"AMAZON FEE"**, with **£235,281.59 across 32 invoices**.
-
-This is not a normal customer return. It appears to be a marketplace fee adjustment, similar to other entries such as:
-
-* Manual
+* Manual — £146,784.46
 * CRUK Commission
 * Bank Charges
 
-These are stored using the same cancellation-style invoice structure as genuine cancelled orders.
+All of these are recorded using the same cancellation-style invoice structure as genuine cancelled orders, which is why they appear on a chart about customer returns.
 
-This means the cancellation chart should **not** be treated as a perfect measure of customer returns.
+### The December spike is a keying error, not a business event
+
+My first reading of this data was that December 2011 was the problem, because cancelled value reached **£205,124.67** — more than double any other month. That reading was wrong, and checking it changed the recommendation.
+
+Almost all of that month is three lines:
+
+| Invoice | Item | Quantity | Value | Share of December |
+| --- | --- | ---: | ---: | ---: |
+| C581484 | PAPER CRAFT , LITTLE BIRDIE | −80,995 | £168,469.60 | 82.1% |
+| C580605 | AMAZON FEE | −1 | £17,836.46 | 8.7% |
+| C580604 | AMAZON FEE | −1 | £11,586.50 | 5.6% |
+
+**96.5% of the December spike is one data-entry error plus two marketplace fees.**
+
+The order it reversed was keyed twelve minutes earlier:
+
+```
+581483    80,995 units @ £2.08    2011-12-09 09:15
+C581484  −80,995 units @ £2.08    2011-12-09 09:27
+```
+
+Someone entered an order more than six times larger than any legitimate order in the dataset and corrected it the same morning. There is no seasonal cancellation problem in December, and no saving available from "bringing it under control".
 
 ### Why this matters
 
-The December spike needs investigation before assuming it is normal seasonal behaviour.
+If the business plans around the reported £896,812.49, it is sizing a returns problem at roughly twice its actual scale, and pointing effort at a December that does not need investigating.
 
-The other 12 months average **£57,640.65** in cancelled value. December is therefore about **£147,484 above that average**.
+The genuine returns figure is closer to **£486,065**.
 
 ### What I would do
 
-First, investigate why December is so different.
+**Finance, and whoever owns the invoicing system:** code marketplace fees and manual adjustments to their own ledger line rather than to cancellation-style invoice numbers. This is a data-entry standard, not an analysis task, and it stops the returns figure measuring two unrelated things.
 
-Second, separate genuine customer cancellations from fees and other adjustments in the source data.
+**Operations:** add a validation rule at order entry so a quantity far outside normal range is challenged before it is saved. The 80,995-unit entry distorted three separate charts and a third of one month's revenue before anyone noticed.
 
 ### How I would measure it
 
-Track December's cancellation rate and cancelled value against the average of the other months.
+Fees appearing on a separate ledger line within one reporting cycle, and a returns figure that Finance recognises as matching their own records.
 
 ---
 
@@ -147,7 +166,16 @@ November also increased by **11.79% compared with October**.
 
 The business appears to have a strong pre-Christmas sales period.
 
-The apparent fall in December should be treated carefully because the dataset ends on **9 December 2011**, so December is only a partial month.
+**December looks like a collapse and is not one.** Two things make it look worse than it was. The dataset ends on **9 December 2011**, so December is only a partial month. And £168,469.60 of the £518,192.79 recorded is the phantom order described in finding 2 — an order that was cancelled twelve minutes after it was keyed, but which still counts as revenue because the cleaning rules exclude cancellation lines rather than subtracting them.
+
+Adjusting for both:
+
+| | Net sales | Days | Per day |
+| --- | ---: | ---: | ---: |
+| November | £1,161,817.38 | 30 | **£38,727** |
+| December (excluding the phantom order) | £349,723.19 | 9 | **£38,858** |
+
+**On a per-day basis, December was running at November's rate**, within a third of a percent. Anyone reading the December bar at face value would conclude demand fell off a cliff and plan the following year around a crash that never happened.
 
 ### What I would do
 
@@ -173,27 +201,36 @@ For the following year, I would look at:
 
 ## 5. International sales are concentrated in a small number of markets
 
-The **Netherlands, EIRE, Germany and France** account for most of the international sales in this dataset.
+The **Netherlands, EIRE, Germany and France** account for most of the international sales in this dataset. But grouping them together hides the more important point, which is that they are two completely different situations:
 
-The Netherlands is a good example. It generated **£285,446.34**, but this came from only **9 customers**.
+| Country | Net sales | Customers | Sales per customer |
+| --- | ---: | ---: | ---: |
+| Netherlands | £285,446.34 | **9** | £31,716 |
+| EIRE | £265,545.90 | **3** | £88,515 |
+| Germany | £228,867.14 | 94 | £2,435 |
+| France | £209,024.05 | 87 | £2,403 |
 
 ### Why this matters
 
-There is already evidence of demand in these countries, but the revenue is concentrated among a small number of customers.
+The Netherlands and EIRE are not really markets. **£550,992 of international revenue rests on twelve customers**, and three of those account for the whole of Ireland. Losing one Irish customer would remove roughly a third of Irish revenue.
 
-That creates both a risk and an opportunity.
+Germany and France look like genuine markets. Around 90 customers each, at an average value per customer roughly in line with a normal repeat buyer, means the demand is spread rather than resting on a handful of accounts.
 
-Losing a few large customers could have a noticeable effect, but the existing customers also show that these markets can generate significant sales.
+Treating all four the same way would be a mistake, because concentrated revenue needs protecting and distributed revenue needs growing.
 
 ### Example of the possible value
 
 If the Netherlands increased from 9 customers to around 14 customers and those new customers spent a similar amount on average, the additional sales could be around **£142,723**.
 
-This is only an illustration. Customer acquisition would not necessarily scale in exactly this way.
+This is only an illustration. Customer acquisition would not necessarily scale in exactly this way, and with only nine existing customers the average is not a reliable basis for forecasting.
 
 ### What I would do
 
-I would focus initial international marketing on countries where the business already has evidence of demand rather than immediately expanding into completely new markets.
+**Split the four countries into two different jobs.**
+
+The Netherlands and EIRE go to account management. Name the twelve customers, give each a named owner, and treat them the way the business would treat any concentrated account risk. The immediate goal is retention, not growth.
+
+Germany and France take the international acquisition budget, because there is evidence there of a market that can be bought into repeatedly rather than a few relationships that happen to be large.
 
 ### How I would measure it
 
@@ -425,6 +462,40 @@ powerbi/dax_measures.txt
 
 ---
 
+# Known issues found after the dashboard was built
+
+Reviewing this project after building it, I found three problems in my own numbers. I have left the dashboard as it was built and documented the issues here, rather than quietly restating the figures, so that the screenshots and the write-up can still be checked against each other.
+
+### The cancellation rate of 17.15% is overstated
+
+The dashboard calculates it as cancelled invoices ÷ (cancelled invoices + valid orders), which is **3,836 ÷ (3,836 + 18,532)**.
+
+Those two numbers come from different places. The 3,836 cancellations are counted from the raw table, but the 18,532 orders are counted from the cleaned view, after rows with no customer ID and other invalid rows have been removed. The denominator is therefore smaller than the numerator's population, which pushes the rate up.
+
+Counted consistently from the raw table — 3,836 cancelled invoices out of 25,900 total invoices — the rate is **14.81%**.
+
+### "Net Sales" is not net of returns
+
+`Net Sales` is `SUM(quantity × unit_price)` over `vw_valid_sales`. That view **excludes** cancellation lines, but excluding them is not the same as subtracting them.
+
+A cancellation is recorded as a separate invoice beginning with `C`. The original positive sale line stays in the data under its own invoice number and passes every cleaning filter. So an order that was placed and then cancelled is still counted as revenue, and the cancellation that reversed it is simply not counted at all.
+
+The clearest example is order `581483`: 80,995 units, **£168,469.60**, cancelled twelve minutes later, and still sitting in the sales total today.
+
+Properly netting off the cancellations that can be attributed to a customer would reduce the figure by about **£611,342**, from £8,911,407.90 to roughly **£8,300,066**. A strictly accurate name for the measure as built would be *gross sales, excluding cancellation lines, identified customers only*.
+
+### The sales figures exclude rows they did not need to
+
+`vw_valid_sales` requires a customer ID. That is correct for the customer and retention pages, because you cannot group by an ID that is not there — but it is wrong for the sales pages, where those rows still carry a valid date, product, quantity and price.
+
+The 135,080 rows without a customer ID are worth **£1,755,277**. Including them, total sales are **£10,666,684.54** rather than £8,911,407.90.
+
+The two errors above work in opposite directions and partly cancel out, which is worse than either on its own — it means the headline total looks plausible while resting on two separate mistakes.
+
+**The fix for all three** is to split the cleaning into two views: a sales view with no customer-ID requirement, and a customer view that keeps it. The cancellation rate would then be calculated from a single consistent population. I have described the fix rather than applied it, because rebuilding the report would invalidate the screenshots in this README.
+
+---
+
 # Limitations
 
 There are several important limitations to this project.
@@ -451,7 +522,7 @@ One limitation of this rule is that a customer who made only one very large purc
 
 Around a quarter of the original rows do not contain a Customer ID.
 
-This means customer-level results only describe the transactions that can be attributed to a known customer.
+This means customer-level results only describe the transactions that can be attributed to a known customer. That restriction is unavoidable for the customer and retention analysis, but it should not have been applied to the sales totals as well — see [Known issues found after the dashboard was built](#known-issues-found-after-the-dashboard-was-built).
 
 ### Old dataset
 
