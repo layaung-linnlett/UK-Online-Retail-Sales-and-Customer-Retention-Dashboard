@@ -4,13 +4,15 @@ A three-page Power BI dashboard built from **541,909 UK retail transactions**. I
 
 One of the main findings was that **195 high-value repeat customers had not purchased for more than 90 days**, representing **£471,684.33 in historical customer value**.
 
+> **Follow-up analysis (August 2026).** I went back to this project and rebuilt the retention logic from scratch, replacing the fixed 90-day rule with one based on each customer's own buying rhythm. That work also found a 5% overstatement in my own net sales figure. It lives in **[ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md)** with every number, the query behind it, and the limitations that remain. Where the two disagree, the follow-up is the more careful answer — the original numbers below are left intact so the dashboard screenshots can still be checked against them.
+
 ## What I found
 
 | Priority | Finding                               |                                  Number | Possible action                                                                     |
 | -------- | ------------------------------------- | --------------------------------------: | ----------------------------------------------------------------------------------- |
-| 1        | High-value customers have gone quiet  |         **195 customers / £471,684.33** | Target them with personalised re-engagement                                         |
+| 1        | High-value customers have gone quiet  |         **195 customers / £471,684.33** | Target them with personalised re-engagement — *[revised](ANALYSIS_SUMMARY.md): 219 customers / £427,267 on a per-customer cadence rule* |
 | 2        | Almost half of "cancellations" are not returns |                **£411k of £896,812.49** | Finance to code fees separately, so the returns figure reflects actual returns      |
-| 3        | Many customers only purchased once    |               **1,493 customers / 34%** | Test an incentive to encourage a second purchase  rather than acquiring new customers with more marketing spend                                   |
+| 3        | Many customers only purchased once    |               **1,493 customers / 34%** | Test an incentive to encourage a second purchase rather than acquiring new customers with more marketing spend — *[revised](ANALYSIS_SUMMARY.md): the true rate is ~18% once customers are given a fair window to return* |
 | 4        | Sales are strongly seasonal           | **2.6× difference** between Feb and Nov | Plan stock and staffing around the Q4 increase                                      |
 | 5        | International sales are concentrated  |    **£551k from 12 customers** in NL and EIRE | Protect NL and EIRE as key accounts; grow DE and FR as markets                      |
 
@@ -372,6 +374,14 @@ The 90-day period was measured from the **last transaction date in the dataset**
 
 This is important because the dataset is from 2010–2011. Comparing it with today's date would incorrectly make every customer look inactive.
 
+**The 2026 follow-up replaced this rule.** A fixed 90-day window treats a customer who buys weekly and one who buys quarterly as the same, which is wrong in both directions. The revised rule flags a customer who has been silent for more than **2× their own median gap between purchases** (minimum 30 days), scoring only customers with three or more purchase occasions and reporting the rest separately.
+
+The multiple was chosen from the data rather than assumed: across 11,551 historical gaps, only **11.6%** ever exceeded 2× the customer's own median, so crossing that line is genuinely unusual behaviour. 2× was preferred over the rarer 3× because the costs are asymmetric — a false positive is one wasted phone call, a false negative is a proven repeat spender lost.
+
+The clearest illustration is customer `16029.0`: the 11th largest customer in the business, who buys every 7.5 days and had been silent for 38 days — five times their own rhythm. The 90-day rule classified them as **"High-value active"** and put them on no list at all.
+
+Full method, before/after comparison and limitations: [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md).
+
 More detail on the data quality checks is available in [DATA_QUALITY_FINDINGS.md](DATA_QUALITY_FINDINGS.md).
 
 ---
@@ -393,12 +403,26 @@ retail-sales-performance-dashboard/
 │       └── CSV exports of analysis queries
 ├── powerbi/
 │   └── DAX measures reference
+├── ANALYSIS_SUMMARY.md
 ├── DATA_QUALITY_FINDINGS.md
 ├── POWERBI_BUILD_GUIDE.md
 ├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
+
+The `sql/` folder runs in order. Scripts `01`–`05` build the original dashboard.
+Scripts `06`–`11` are the 2026 retention follow-up and are additive — they create
+new views rather than modifying the originals:
+
+| Script | What it answers |
+| ------ | --------------- |
+| `06_retention_cadence.sql` | At-risk customers judged against their own buying rhythm |
+| `07_revenue_concentration.sql` | Revenue concentration, top-customer exposure, and the reversal fix |
+| `08_first_to_second_purchase.sql` | One-and-done rate and how long the second purchase takes |
+| `09_cohort_retention.sql` | Retention by first-purchase month |
+| `10_customer_value.sql` | Observed customer value, one-time versus repeat |
+| `11_stayers_vs_leavers.sql` | What distinguishes retained from lapsed customers (correlation only) |
 
 There is no `notebooks/` folder because I did not use a Jupyter notebook for the analysis.
 
@@ -484,6 +508,10 @@ The clearest example is order `581483`: 80,995 units, **£168,469.60**, cancelle
 
 Properly netting off the cancellations that can be attributed to a customer would reduce the figure by about **£611,342**, from £8,911,407.90 to roughly **£8,300,066**. A strictly accurate name for the measure as built would be *gross sales, excluding cancellation lines, identified customers only*.
 
+**Measured more precisely in the 2026 follow-up.** The £611,342 above is the total value of every cancellation carrying a customer ID, which is an upper bound. Matching each cancellation to the specific sale line it reverses — same customer, product, unit price and exact quantity, cancellation dated on or after the sale — identifies **£445,874.74 across 3,887 sale lines and 792 customers**, exactly **5.00%** of reported net sales. The remaining 6,088 cancellation lines (**£207,858.81**) have no exact match, mostly partial cancellations and price-adjusted returns.
+
+So the overstatement is **between £445,875 and £611,342**, and true net sales for identified customers is **between £8,300,066 and £8,465,533**. The corrected view `vw_valid_sales_net` in [sql/07_revenue_concentration.sql](sql/07_revenue_concentration.sql) takes the conservative end, removing only sale lines with a demonstrable match. The original `vw_valid_sales` is unchanged, so every published figure above still reproduces.
+
 ### The sales figures exclude rows they did not need to
 
 `vw_valid_sales` requires a customer ID. That is correct for the customer and retention pages, because you cannot group by an ID that is not there — but it is wrong for the sales pages, where those rows still carry a valid date, product, quantity and price.
@@ -539,6 +567,8 @@ There are three main improvements I would make next.
 Separate genuine customer cancellations from fee adjustments and other accounting entries at the source.
 
 ### 2. Build a churn model
+
+*Partly addressed in the 2026 follow-up, though deliberately not with a model — see [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md). With one year of data there is no post-period in which to observe who actually churned, so there is nothing to train or validate against. The revised rule identifies customers behaving unlike themselves; it does not predict churn and is not described as doing so.*
 
 Replace the simple 90-day rule with a model that estimates the probability of a customer returning or becoming inactive.
 

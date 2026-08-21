@@ -33,3 +33,6 @@ CLAUDE.md
 .ipynb_checkpoints/
 
 # Files over ~50 MB should not be committed - use Git LFS or a download step instead.
+
+# Personal interview prep - not for the public repo
+INTERVIEW_NOTES.md
