@@ -21,6 +21,10 @@ Click-by-click instructions for building the three-page dashboard from scratch. 
 
 # Part 0 — Before you start
 
+## What you need
+
+**Power BI Desktop is Windows-only.** There is no Mac version and there never has been. If you are on a Mac you need one of:
+
 * a Windows PC or laptop
 * Windows running in a virtual machine (Parallels, VMware, UTM)
 * a cloud Windows desktop
@@ -75,6 +79,21 @@ Down the **far left edge** there are three small icons. You will switch between 
 4. **Database:** `online_retail_db`
 5. Leave **Data Connectivity mode** on **Import**. (The other option, DirectQuery, queries the database live on every click. This is a fixed historical dataset that never changes, so Import is faster with no downside.)
 6. Click **OK**.
+
+### Two prompts you will probably hit
+
+**"Npgsql driver not found."** Power BI's PostgreSQL connector needs a separate component that does not ship with Power BI Desktop. Download it from [npgsql.org](https://www.npgsql.org/), run the installer, then **fully close and reopen Power BI Desktop** before retrying from step 1. One-time setup.
+
+**Credentials.** Choose **Database** on the left, not Windows:
+
+| Field | Value |
+|---|---|
+| User name | the PostgreSQL user you connect to `online_retail_db` with |
+| Password | leave blank if your local instance uses trust authentication, otherwise enter it |
+
+Leave the level set to the database itself, so the credential is remembered for `online_retail_db` specifically, then click **Connect**.
+
+**"We were unable to connect using encryption."** Expected if your PostgreSQL is not set up for SSL. Click **OK** to connect unencrypted — this is your own machine, on your own network, holding public UCI data.
 
 ## 1.2 Load the four views
 
