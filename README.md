@@ -27,7 +27,7 @@ One of the main findings was that **195 high-value repeat customers had not purc
 | [Dashboard screenshots](#dashboard-screenshots) | The three report pages |
 | [Methodology](#methodology) | Business problem, dataset, cleaning decisions |
 | [How to Run](#how-to-run) | Reproduce everything from a fresh clone |
-| [Known issues](#known-issues-found-after-the-dashboard-was-built) | Three mistakes I found in my own numbers |
+| [Known issues](#known-issues-found-after-the-dashboard-was-built) | Mistakes I found in my own numbers |
 | [Limitations](#limitations) | What this data cannot answer |
 
 </details>
@@ -142,7 +142,7 @@ The genuine merchandise returns figure is **£310,254.58**.
 
 ### What I would do
 
-**Finance, and whoever owns the invoicing system:** code marketplace fees and manual adjustments to their own ledger line rather than to cancellation-style invoice numbers. This is a data-entry standard, not an analysis task, and it stops the returns figure measuring two unrelated things.
+**Finance, and whoever owns the invoicing system:** code marketplace fees and manual adjustments to their own ledger line rather than to cancellation-style invoice numbers. This is a data-entry standard, not an analysis task, and it stops the returns figure measuring several unrelated things at once.
 
 **Operations:** add a validation rule at order entry so a quantity far outside normal range is challenged before it is saved. The 80,995-unit entry distorted three separate charts and a third of one month's revenue before anyone noticed.
 
@@ -164,7 +164,7 @@ All five customer segments, so the 1,493 can be seen in proportion:
 | One-time customer      |     1,493 |   £616,311.73 |       £412.80 |
 | Active repeat customer |       844 |   £491,584.69 |       £582.45 |
 | High-value at risk     |       195 |   £471,684.33 |     £2,418.89 |
-| At-risk repeat         |       407 |   £206,447.58 |       £507.24 |
+| At-risk repeat customer |      407 |   £206,447.58 |       £507.24 |
 | **Total**              | **4,338** | **£8,911,407.90** | |
 
 *Source: [`outputs/query_results/13_customer_segment_summary.csv`](outputs/query_results/13_customer_segment_summary.csv)*
@@ -460,10 +460,10 @@ UK-Online-Retail-Sales-and-Customer-Retention-Dashboard/
 │   ├── figures/
 │   │   └── dashboard screenshots
 │   └── query_results/
-│       └── 64 CSVs, one per analysis query
+│       └── 66 CSVs, one per analysis query
 ├── powerbi/
 │   ├── online_retail_dashboard.pbix    (the built report)
-│   └── dax_measures.txt                (the 12 DAX measures, with reasoning)
+│   └── dax_measures.txt                (the 14 DAX measures, with reasoning)
 ├── ANALYSIS_SUMMARY.md                 (2026 follow-up: every number + limitations)
 ├── DATA_QUALITY_FINDINGS.md            (what the raw data looks like, and its problems)
 ├── POWERBI_BUILD_GUIDE.md              (how to rebuild the report by hand)
@@ -558,7 +558,7 @@ The data quality results are documented in `DATA_QUALITY_FINDINGS.md`.
 python src/02_export_query_results.py
 ```
 
-This writes 64 CSVs to `outputs/query_results/` — one per analysis query. It does not contain the queries itself; it reads them out of the `sql/` files, so the CSVs cannot drift from the SQL they claim to come from. Every number quoted in this README and in [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md) can be checked against one of these files.
+This writes 66 CSVs to `outputs/query_results/` — one per analysis query. It does not contain the queries itself; it reads them out of the `sql/` files, so the CSVs cannot drift from the SQL they claim to come from. Every number quoted in this README and in [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md) can be checked against one of these files.
 
 ## 6. Open the Power BI report
 
@@ -661,6 +661,8 @@ The at-risk customer list uses a fixed rule:
 This is useful for identifying a group to investigate, but it is **not a predictive churn model**.
 
 One limitation of this rule is that a customer who made only one very large purchase can still be classified as a one-time customer.
+
+The dashboard still uses this rule, so the 195 figure reproduces. The 2026 follow-up replaced it with a per-customer cadence rule and reports 219 customers — see [Data Preparation](#at-risk-customers) and [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md).
 
 ### Missing Customer IDs
 
