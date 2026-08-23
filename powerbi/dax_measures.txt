@@ -17,6 +17,37 @@ All measures below were checked against the CSVs in outputs/query_results/
 should equal £8,911,407.90, the same figure in
 outputs/query_results/02_overall_kpis.csv.
 
+KNOWN ISSUES IN THESE MEASURES
+------------------------------
+
+FIXED - Cancellation Rate. It used to divide a numerator counted from the raw
+table by a denominator counted from vw_valid_sales, after rows with no
+customer ID had been removed. Two different populations, which inflated the
+rate to 17.15% against a true 14.81%. It also could not be filtered:
+vw_valid_sales was related to DateTable and vw_cancellations was not, so a
+date filter shrank the denominator and left the numerator whole - February
+2011 returned 79% against a true 15.72%.
+
+Both faults are now fixed at the data layer. vw_all_invoices (see
+sql/03_clean_views.sql) is one row per invoice for the whole dataset, cancelled
+or not, each carrying a date. Both halves of the fraction are counted from it,
+so the rate is consistent AND filters correctly by month.
+
+STILL PRESENT - Net Sales is not net of returns. vw_valid_sales excludes
+cancellation lines but does not subtract the original orders they reverse, so
+a fully cancelled order is still counted as revenue. The overstatement is
+between GBP 445,875 and GBP 611,342. A corrected view, vw_valid_sales_net,
+exists in sql/07_revenue_concentration.sql but is deliberately NOT what these
+measures use.
+
+Why fix one and not the other: the cancellation rate is a self-contained
+metric - correcting it changes one card and one paragraph. Net Sales is the
+denominator of nearly every figure in the README and ANALYSIS_SUMMARY, and
+restating it would mean rewriting the entire analysis rather than disclosing a
+bounded, measured error. ANALYSIS_SUMMARY already carries both bases side by
+side for exactly this reason. Cheap and local: fix it. Expensive and
+cascading: measure it, bracket it, and say so.
+
 ----------------------------------------------------------------------------
 Net Sales =
 SUM(vw_valid_sales[sales_value])
@@ -70,29 +101,47 @@ with C), kept as a positive number via ABS() in the SQL view.
 Why SUM: cancellation_value is a per-line amount, same as sales_value.
 
 ----------------------------------------------------------------------------
-Cancelled Invoices =
-DISTINCTCOUNT(vw_cancellations[invoice_no])
+Total Invoices =
+DISTINCTCOUNT(vw_all_invoices[invoice_no])
 
-What it calculates: how many separate cancellation invoices were raised.
-Why DISTINCTCOUNT: same reasoning as Total Orders — one cancelled invoice
-can span several product lines.
+What it calculates: every invoice raised in the period, cancellations included.
+Why it exists: this is the denominator the cancellation rate always needed - a
+count of the whole invoice population from one source, rather than a count of
+surviving orders from a filtered view.
+
+----------------------------------------------------------------------------
+Cancelled Invoices =
+CALCULATE(
+    DISTINCTCOUNT(vw_all_invoices[invoice_no]),
+    vw_all_invoices[is_cancellation] = TRUE
+)
+
+What it calculates: how many of those invoices were cancellations. Returns
+3,836, the same as counting vw_cancellations directly.
+Why count it from vw_all_invoices instead: so the numerator and the denominator
+of Cancellation Rate come from the same table, on the same date relationship.
+Counting one from here and the other from elsewhere is exactly the bug this
+replaced.
 
 ----------------------------------------------------------------------------
 Cancellation Rate =
 DIVIDE(
     [Cancelled Invoices],
-    [Cancelled Invoices] + [Total Orders],
+    [Total Invoices],
     0
 )
 
-What it calculates: cancelled invoices as a share of all invoices raised
-(cancelled + valid). Format this measure as a percentage in Power BI.
-Why DIVIDE: same divide-by-zero protection as Average Order Value. Note:
-the plan's wireframe calls for a "Cancellation rate" KPI card on Page 3 but
-doesn't hand over ready-made DAX for it, so this measure was written to
-match the cancellation_rate_pct calculation in
-sql/04_sales_analysis.sql (17.15% on the full dataset) rather than invented
-from scratch.
+What it calculates: cancelled invoices as a share of all invoices raised.
+Format as a percentage in Power BI. Returns 14.81% for the full period.
+Why DIVIDE: returns the third argument instead of erroring if the denominator
+is 0 - which happens the moment a slicer excludes everything.
+Why this is now correct: both measures read from vw_all_invoices, which is one
+row per invoice for the entire dataset and is related to DateTable. Filter to
+February 2011 and it returns 15.72%, which is the real February rate. The old
+version returned 79%.
+
+Check against outputs/query_results/59_cancellation_rate_corrected.csv (full
+period) and 60_cancellation_rate_by_month.csv (monthly).
 
 ----------------------------------------------------------------------------
 High-Value Active Customers =
@@ -135,6 +184,21 @@ Why CALCULATE: same pattern again, filtered to the "At-risk repeat customer"
 segment.
 
 ----------------------------------------------------------------------------
+Active Repeat Customers =
+CALCULATE(
+    COUNTROWS(vw_customer_profile),
+    vw_customer_profile[customer_segment] = "Active repeat customer"
+)
+
+What it calculates: repeat customers (2+ orders) below the GBP 1,000 high-value
+threshold who HAVE ordered within the last 90 days - the healthy middle of the
+customer base.
+Why CALCULATE: same pattern as the other segment measures.
+Why it matters that this one exists: there are five segments. Without this
+measure the Page 2 KPI row only accounts for 3,494 of 4,338 customers, and the
+844 customers in this segment silently vanish from the page.
+
+----------------------------------------------------------------------------
 One-Time Customers =
 CALCULATE(
     COUNTROWS(vw_customer_profile),
@@ -142,11 +206,9 @@ CALCULATE(
 )
 
 What it calculates: customers who have only ever placed a single order.
-Why CALCULATE: the plan's Page 2 KPI row calls for "One-Time Customers" as
-the fourth card alongside the three segment measures above, but the plan's
-DAX section doesn't provide it — this one was added to complete the set,
-following the exact same CALCULATE + COUNTROWS pattern as the other three
-segment measures for consistency.
+Why CALCULATE: follows the exact same CALCULATE + COUNTROWS pattern as the
+other three segment measures, so all four KPI cards on Page 2 are built the
+same way.
 
 ============================================================================
 Measure -> KPI card mapping (so nothing gets missed while building the report)
@@ -155,9 +217,15 @@ Measure -> KPI card mapping (so nothing gets missed while building the report)
 Page 1 - Sales overview:
   Net Sales, Total Orders, Unique Customers, Average Order Value
 
-Page 2 - Customer retention:
-  High-Value Active Customers, High-Value At-Risk Customers,
-  At-Risk Repeat Customers, One-Time Customers
+Page 2 - Customer retention (five cards, one per segment - they must sum to
+4,338, the same total as Unique Customers on Page 1):
+  High-Value Active Customers      1,399
+  High-Value At-Risk Customers       195
+  Active Repeat Customers            844
+  At-Risk Repeat Customers           407
+  One-Time Customers               1,493
 
 Page 3 - Cancellations and products:
-  Cancelled Invoices, Cancelled Value, Cancellation Rate
+  Cancelled Invoices    3,836
+  Cancelled Value       GBP 896,812.49
+  Cancellation Rate     14.81%  (was 17.15% before the fix)
