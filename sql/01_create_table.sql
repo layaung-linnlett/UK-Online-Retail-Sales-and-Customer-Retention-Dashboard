@@ -12,7 +12,11 @@
 --   None directly - this is the foundation every other script depends on.
 -- ============================================================================
 
-DROP TABLE IF EXISTS online_retail_raw;
+-- CASCADE, so this script can be re-run to reload the data. Every view in
+-- this project is built on this table, and Postgres refuses to drop a table
+-- that still has dependents. The views are all recreated by running scripts
+-- 03-11 afterwards, which is the documented order anyway.
+DROP TABLE IF EXISTS online_retail_raw CASCADE;
 
 CREATE TABLE online_retail_raw (
     invoice_no      TEXT,
