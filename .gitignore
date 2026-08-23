@@ -34,7 +34,7 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Personal notes and local tooling - never publish these
+# Personal notes and local tooling
 CLAUDE.md
 STUDY_GUIDE.md
 INTERVIEW_NOTES.md
