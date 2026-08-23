@@ -700,25 +700,6 @@ If cost or margin data were available, the dashboard could move from measuring r
 
 ---
 
-# What I Learned
-
-This project helped me practise working through a data project from the raw dataset to a finished dashboard.
-
-The main things I worked on were:
-
-* cleaning a large transaction dataset using SQL
-* writing CTEs and window functions
-* checking data quality before analysing it
-* building customer-level metrics
-* connecting PostgreSQL to Power BI
-* creating DAX measures
-* turning analysis into business recommendations
-* being careful about what the data can and cannot actually tell us
-
-One of the biggest lessons was that **getting the numbers right comes before building the dashboard**. For example, finding that "AMAZON FEE" was included in the cancellation data changed how I interpreted the cancellation results.
-
----
-
 # Licence
 
 The code and documentation in this repository are MIT licensed — see [LICENSE](LICENSE).
