@@ -76,7 +76,7 @@
 -- Purchase occasions, gaps, and per-customer median cadence
 -- ----------------------------------------------------------------------------
 
-DROP VIEW IF EXISTS vw_customer_cadence;
+DROP VIEW IF EXISTS vw_customer_cadence CASCADE;
 
 CREATE VIEW vw_customer_cadence AS
 WITH dataset_end AS (

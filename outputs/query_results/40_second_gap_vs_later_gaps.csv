@@ -1,0 +1,3 @@
+which_gap,gaps_measured,median_days,mean_days
+"All later gaps (2->3, 3->4, ...)",9548,22,35.1
+Gap 1->2 (winning the second purchase),2782,57,82.5

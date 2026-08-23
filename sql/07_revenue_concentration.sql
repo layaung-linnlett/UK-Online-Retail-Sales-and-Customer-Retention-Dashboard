@@ -18,11 +18,11 @@
 --   Its revenue stays in the totals.
 --
 --   Two examples sit in the published top 10 by spend:
---     Customer 16446.0 - invoice 581483, 80,995 units of PAPER CRAFT LITTLE
+--     Customer 16446 - invoice 581483, 80,995 units of PAPER CRAFT LITTLE
 --       BIRDIE at GBP 2.08 = GBP 168,469.60 on 2011-12-09 09:15. Reversed by
 --       C581484 at 09:27 the SAME MORNING, twelve minutes later. This
 --       customer's genuine lifetime spend is GBP 2.90 - two brushes.
---     Customer 12346.0 - invoice 541431, 74,215 units at GBP 1.04 =
+--     Customer 12346 - invoice 541431, 74,215 units at GBP 1.04 =
 --       GBP 77,183.60 on 2011-01-18 10:01. Reversed by C541433 at 10:17 the
 --       same morning. This customer's genuine lifetime spend is GBP 0.00.
 --
@@ -65,6 +65,13 @@ WHERE EXISTS (
 
 -- ----------------------------------------------------------------------------
 -- 2. The corrected sales view. Added alongside vw_valid_sales, not replacing it.
+--
+--    NOTE ON CASCADE: scripts 08 and 11 build views on top of
+--    vw_valid_sales_net, so dropping it with CASCADE drops those too. That is
+--    intentional - a stale dependent view is worse than a missing one - but it
+--    means re-running THIS script on its own leaves 08 and 11 needing to be
+--    re-run before their queries will work again. Running the scripts in order
+--    from 07 onward always leaves the database consistent.
 -- ----------------------------------------------------------------------------
 DROP VIEW IF EXISTS vw_valid_sales_net CASCADE;
 
@@ -145,7 +152,17 @@ SELECT v.cut AS top_n_customers,
        ROUND(100.0 * MAX(CASE WHEN r.rn = v.cut THEN r.cum_spend END)
              / MAX(r.total_spend), 1) AS pct_of_revenue
 FROM ranked AS r
-CROSS JOIN (VALUES (1),(5),(10),(20),(50),(100),(433),(865),(1170)) AS v(cut)
+-- The cut points: fixed head-of-the-curve counts, plus three derived from the
+-- size of the customer base itself (top 10%, top 20%, and the 80% crossover
+-- point found by the query above). Deriving them means the chart stays correct
+-- if the underlying data changes, instead of silently reporting the wrong
+-- percentile against hardcoded row numbers.
+CROSS JOIN LATERAL (
+    VALUES (1), (5), (10), (20), (50), (100),
+           (ROUND(r.total_customers * 0.10)::int),
+           (ROUND(r.total_customers * 0.20)::int),
+           ((SELECT MIN(rn) FROM ranked WHERE cum_spend >= 0.80 * total_spend))
+) AS v(cut)
 GROUP BY v.cut
 ORDER BY v.cut;
 

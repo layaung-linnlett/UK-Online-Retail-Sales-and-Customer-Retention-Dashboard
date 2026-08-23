@@ -1,0 +1,4 @@
+movement,customers,total_spend,avg_median_gap,avg_days_quiet
+DROPPED by cadence rule,435,431160.40,89.5,175.3
+On both lists,167,246971.51,39.1,169.8
+ADDED by cadence rule,57,215583.24,21.6,63.4

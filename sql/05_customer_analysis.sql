@@ -24,7 +24,7 @@
 --   relative "top 20% by spend" definition instead of a fixed cutoff.
 -- ============================================================================
 
-DROP VIEW IF EXISTS vw_customer_profile;
+DROP VIEW IF EXISTS vw_customer_profile CASCADE;
 
 CREATE VIEW vw_customer_profile AS
 WITH dataset_end AS (
@@ -108,3 +108,10 @@ SELECT
 FROM vw_customer_profile
 ORDER BY total_spend DESC
 LIMIT 20;
+
+-- Full customer profile, one row per customer.
+-- This is the table Power BI Page 2 is built on, and the source for
+-- outputs/query_results/16_full_customer_profile.csv.
+SELECT *
+FROM vw_customer_profile
+ORDER BY total_spend DESC;

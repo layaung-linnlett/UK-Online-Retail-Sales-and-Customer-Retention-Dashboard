@@ -3,17 +3,28 @@ data/*.csv
 data/*.xlsx
 data/*.xls
 
-# Power BI backups and local files
-powerbi/*.pbix
+# Power BI backups and local files.
+# The dashboard itself (powerbi/online_retail_dashboard.pbix, ~4 MB) IS
+# tracked - it is the deliverable this project is named after, and a reader
+# who cannot open it cannot check anything in the README against it.
 powerbi/*.pbit
 powerbi/*.zip
+powerbi/*.pbix.bak
 
 # Python
 __pycache__/
 *.py[cod]
+*.egg-info/
 .venv/
 venv/
+env/
 .env
+.ipynb_checkpoints/
+.pytest_cache/
+
+# Model / pickle artefacts (none currently, but never commit them)
+*.pkl
+*.joblib
 
 # Operating system files
 .DS_Store
@@ -23,16 +34,12 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Personal interview prep notes - not part of the public project
+# Personal notes and local tooling - never publish these
+CLAUDE.md
 STUDY_GUIDE.md
-# Claude Code local tooling config
+INTERVIEW_NOTES.md
 .claude/
 
-# Personal learning notes - never publish
-CLAUDE.md
-.ipynb_checkpoints/
-
-# Files over ~50 MB should not be committed - use Git LFS or a download step instead.
-
-# Personal interview prep - not for the public repo
-INTERVIEW_NOTES.md
+# Note: files over ~50 MB should not be committed. Use Git LFS or a download
+# step instead. The dataset (~69 MB across the xlsx and csv) is handled by the
+# download step in the README rather than being tracked here.

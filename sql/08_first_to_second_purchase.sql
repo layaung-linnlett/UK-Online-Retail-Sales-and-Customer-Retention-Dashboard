@@ -33,7 +33,7 @@
 -- ----------------------------------------------------------------------------
 -- 0. Reusable base: each customer's first and second purchase dates
 -- ----------------------------------------------------------------------------
-DROP VIEW IF EXISTS vw_first_second_purchase;
+DROP VIEW IF EXISTS vw_first_second_purchase CASCADE;
 
 CREATE VIEW vw_first_second_purchase AS
 WITH dataset_end AS (

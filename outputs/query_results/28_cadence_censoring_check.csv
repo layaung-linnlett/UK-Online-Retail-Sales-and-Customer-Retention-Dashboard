@@ -1,0 +1,5 @@
+censoring_bucket,customers,total_spend
+1. Not yet due - no signal either way,1422,6026271.05
+"2. Late, but inside tolerance",259,779952.69
+3. Past 2x but under the 30-day floor,11,67972.30
+4. Past 2x and past the floor - FLAGGED,224,462554.75

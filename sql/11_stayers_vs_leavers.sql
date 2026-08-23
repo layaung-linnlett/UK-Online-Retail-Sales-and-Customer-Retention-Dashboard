@@ -32,6 +32,82 @@
 
 
 -- ----------------------------------------------------------------------------
+-- 0. vw_customer_cadence_net - the cadence rule applied to corrected data
+--
+--    This is vw_customer_cadence from 06_retention_cadence.sql, rebuilt on
+--    vw_valid_sales_net (the reversal-corrected view from
+--    07_revenue_concentration.sql) instead of vw_valid_sales. Same rule, same
+--    thresholds - only the underlying sales data differs.
+--
+--    It is defined here rather than in 06 because it depends on
+--    vw_valid_sales_net, which does not exist until 07 has run. Keeping it
+--    here means 06 stays runnable on its own.
+-- ----------------------------------------------------------------------------
+
+DROP VIEW IF EXISTS vw_customer_cadence_net CASCADE;
+
+CREATE VIEW vw_customer_cadence_net AS
+WITH dataset_end AS (
+    SELECT MAX(order_date) AS dataset_end_date
+    FROM vw_valid_sales_net
+),
+purchase_occasions AS (
+    SELECT DISTINCT customer_id, order_date
+    FROM vw_valid_sales_net
+),
+gaps AS (
+    SELECT
+        customer_id,
+        (order_date - LAG(order_date) OVER (PARTITION BY customer_id
+                                            ORDER BY order_date)) AS gap_days
+    FROM purchase_occasions
+),
+cadence AS (
+    SELECT
+        customer_id,
+        COUNT(*) AS gap_count,
+        ROUND(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY gap_days)::numeric, 1) AS median_gap_days
+    FROM gaps
+    WHERE gap_days IS NOT NULL
+    GROUP BY customer_id
+),
+customer_summary AS (
+    SELECT
+        customer_id,
+        MIN(order_date)              AS first_order_date,
+        MAX(order_date)              AS last_order_date,
+        COUNT(DISTINCT order_date)   AS purchase_occasions,
+        SUM(quantity)                AS total_items,
+        ROUND(SUM(sales_value), 2)   AS total_spend
+    FROM vw_valid_sales_net
+    GROUP BY customer_id
+)
+SELECT
+    cs.customer_id,
+    cs.first_order_date,
+    cs.last_order_date,
+    cs.purchase_occasions,
+    cs.total_items,
+    cs.total_spend,
+    de.dataset_end_date,
+    (de.dataset_end_date - cs.last_order_date) AS days_since_last_order,
+    c.median_gap_days,
+    CASE
+        WHEN cs.purchase_occasions = 1
+            THEN 'Single purchase - no cadence'
+        WHEN cs.purchase_occasions = 2
+            THEN 'Two purchases - cadence unreliable'
+        WHEN (de.dataset_end_date - cs.last_order_date) > 2 * c.median_gap_days
+             AND (de.dataset_end_date - cs.last_order_date) >= 30
+            THEN 'At risk - overdue on own cadence'
+        ELSE 'Active - within own cadence'
+    END AS cadence_segment
+FROM customer_summary AS cs
+CROSS JOIN dataset_end AS de
+LEFT JOIN cadence AS c ON c.customer_id = cs.customer_id;
+
+
+-- ----------------------------------------------------------------------------
 -- 1. THE FIRST HURDLE - customers who never came back at all
 --
 --    Unfiltered. Note the last column: customers who never returned were

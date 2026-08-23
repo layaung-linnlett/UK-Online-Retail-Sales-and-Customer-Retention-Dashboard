@@ -1,0 +1,3 @@
+customer_group,customers,mean_first_order_value,median_first_order_value,mean_first_order_items,median_first_order_items,mean_days_observed
+Never returned,1545,400.54,257.70,227.7,144.0,156
+Returned at least once,2782,445.93,308.41,262.4,165.0,260

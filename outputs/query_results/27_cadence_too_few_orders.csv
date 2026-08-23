@@ -1,0 +1,3 @@
+cadence_segment,customers,total_spend,avg_spend,avg_days_quiet
+Single purchase - no cadence,1548,704741.62,455.26,155.6
+Two purchases - cadence unreliable,874,869915.49,995.33,90.2

@@ -1,0 +1,6 @@
+purchase_band,customers,pct_of_customers,revenue,pct_of_revenue,mean_spend,median_spend,mean_value_per_purchase
+1 purchase,1545,35.7,618836.25,7.3,400.54,257.70,400.54
+2 purchases,878,20.3,680903.63,8.0,775.52,584.89,387.76
+3-5 purchases,1115,25.8,1648085.61,19.5,1478.10,1125.07,389.80
+6-10 purchases,510,11.8,1561734.43,18.4,3062.22,2428.18,417.53
+11+ purchases,279,6.4,3955973.24,46.7,14179.12,6135.38,667.46

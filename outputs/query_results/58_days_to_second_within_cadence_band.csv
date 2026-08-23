@@ -1,0 +1,5 @@
+cadence_band,n_active,active_median_days_to_second,n_lapsed,lapsed_median_days_to_second
+a. Fast (under 20d),247,15,60,10
+b. Medium (20-40d),434,31,71,29
+c. Slow (40-70d),491,56,75,46
+d. Very slow (70d+),513,104,13,91
