@@ -1,10 +1,10 @@
 # UK Online Retail: Sales and Customer Retention Dashboard
 
-A three-page Power BI dashboard built from **541,909 UK retail transactions**. I used PostgreSQL and SQL to clean and analyse the data, then built the dashboard in Power BI to look at sales, customers, retention, cancellations and product demand.
+A three-page Power BI dashboard built from **541,909 UK retail transactions**. I used PostgreSQL and SQL to clean and analyse the data, then built the dashboard in Power BI to look at sales, customers, retention, cancellations, and product demand.
 
 One of the main findings was that **195 high-value repeat customers had not purchased for more than 90 days**, representing **£471,684.33 in historical customer value**.
 
-> **Follow-up analysis (August 2026).** I went back to this project and rebuilt the retention logic from scratch, replacing the fixed 90-day rule with one based on each customer's own buying rhythm. That work also found a 5% overstatement in my own net sales figure. It lives in **[ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md)** with every number, the query behind it, and the limitations that remain. Where the two disagree, the follow-up is the more careful answer — the original numbers below are left intact so the dashboard screenshots can still be checked against them.
+> **Follow-up analysis (August 2026).** I went back to this project and rebuilt the retention logic from scratch, replacing the fixed 90-day rule with one based on each customer's own buying rhythm. That work also found a 5% overstatement in my own net sales figure. It lives in **[ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md)** with every number, the query behind it, and the limitations that remain.
 
 ## What I found
 
