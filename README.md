@@ -71,7 +71,11 @@ This is only an example to show the size of the opportunity. It is **not a forec
 
 **This changes where the retention budget goes.** Instead of spreading it across all 4,338 customers or sending one promotion to everyone, it concentrates on the **4.5% of the customer base that holds £471,684.33 of already-proven spend.**
 
-The scale is easier to judge as a comparison. At the average first order value of £412.80, recovering these 195 customers is worth roughly **1,143 brand-new customers** — and it is a call list one account manager can work through in a fortnight, not a campaign that has to be built first.
+These 195 are **4.5% of the customer base** and account for **5.3% of net sales**. That is spend the business has already paid to acquire once.
+
+I am not going to put a return figure on a win-back campaign. That needs the win-back rate and the cost of acquiring a customer, and neither is in this dataset. If a comparison is wanted: £471,684.33 is roughly what **230 average customers** are worth across their whole time with the business, since mean spend per customer is £2,054.27.
+
+> **An earlier version of this README said 1,143 customers.** That divided these customers' *lifetime* spend by £412.80 and called it the average first order value. Two things were wrong with it. £412.80 is the average *total* spend of a one-time customer, not a first order value — the actual average first order is £400.54. And dividing a lifetime figure by a single transaction inflates the comparison, because a new customer goes on to have a lifetime too. Compared like for like it is 230, not 1,143.
 
 I would work the list top-down by lifetime value, with a personalised message or offer rather than the same promotion to everyone.
 
@@ -113,7 +117,7 @@ All of these use the same cancellation-style invoice structure as genuine cancel
 
 ### The December spike is a keying error, not a business event
 
-My first reading of this data was that December 2011 was the problem, because cancelled value reached **£205,124.67** — more than double any other month. That reading was wrong, and checking it changed the recommendation.
+My first reading of this data was that December 2011 was the problem, because cancelled value reached **£205,124.67** — more than four times the typical month, and 56% above the next highest. That reading was wrong, and checking it changed the recommendation.
 
 Almost all of that month is three lines:
 
@@ -132,7 +136,7 @@ The order it reversed was keyed twelve minutes earlier:
 C581484  −80,995 units @ £2.08    2011-12-09 09:27
 ```
 
-Someone entered an order more than six times larger than any legitimate order in the dataset and corrected it the same morning. There is no seasonal cancellation problem in December, and no saving available from "bringing it under control".
+Someone entered an order more than five times larger than any legitimate order in the dataset — the largest genuine order all year was 15,049 units — and corrected it the same morning. There is no seasonal cancellation problem in December, and no saving available from "bringing it under control".
 
 ### Why this matters
 
@@ -436,7 +440,7 @@ This is important because the dataset is from 2010–2011. Comparing it with tod
 
 The multiple was chosen from the data rather than assumed: across 11,551 historical gaps, only **11.6%** ever exceeded 2× the customer's own median, so crossing that line is genuinely unusual behaviour. 2× was preferred over the rarer 3× because the costs are asymmetric — a false positive is one wasted phone call, a false negative is a proven repeat spender lost.
 
-The clearest illustration is customer `16029`: the 11th largest customer in the business, who buys every 7.5 days and had been silent for 38 days — five times their own rhythm. The 90-day rule classified them as **"High-value active"** and put them on no list at all.
+The clearest illustration is customer `16029`: the 9th largest customer in the business on the published basis, and the 11th once the cancelled-order defect is corrected. They buy every 7.5 days and had been silent for 38 days — five times their own rhythm. The 90-day rule classified them as **"High-value active"** and put them on no list at all.
 
 Full method, before/after comparison and limitations: [ANALYSIS_SUMMARY.md](ANALYSIS_SUMMARY.md).
 
