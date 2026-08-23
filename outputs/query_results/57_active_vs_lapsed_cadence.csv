@@ -1,0 +1,3 @@
+customer_group,customers,mean_of_their_median_gaps,median_of_their_median_gaps,mean_days_currently_quiet
+Active - within own cadence,1685,57.1,48.0,28.1
+At risk - overdue on own cadence,219,35.1,34.0,143.7

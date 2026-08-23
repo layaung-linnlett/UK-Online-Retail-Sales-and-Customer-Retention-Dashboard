@@ -1,0 +1,3 @@
+basis,sales_lines,customers,net_sales
+As published (vw_valid_sales),397880,4338,8911407.90
+Corrected (vw_valid_sales_net),393993,4327,8465533.16

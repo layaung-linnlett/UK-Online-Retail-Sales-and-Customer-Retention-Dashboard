@@ -1,0 +1,3 @@
+customer_group,customers,pct_of_customers,revenue,pct_of_revenue,mean_spend,median_spend,avg_purchases
+One-time buyer,1545,35.7,618836.25,7.3,400.54,257.70,1.0
+Repeat buyer,2782,64.3,7846696.91,92.7,2820.52,1163.34,5.4

@@ -1,0 +1,4 @@
+basis,customers,mean_spend,median_spend
+All customers,4327,1956.44,664.26
+Excluding the top 10,4317,1642.50,662.59
+Excluding the top 1% (43 customers),4284,1386.11,656.96
