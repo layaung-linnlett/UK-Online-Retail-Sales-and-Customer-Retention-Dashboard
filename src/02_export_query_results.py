@@ -3,9 +3,9 @@
 Why this exists
 ---------------
 The CSVs in outputs/query_results/ are the evidence behind the numbers quoted
-in README.md and ANALYSIS_SUMMARY.md. Before this script they were exported by
-hand, which meant a reader had no way to regenerate them and no way to confirm
-a CSV still matched the query it claimed to come from.
+in README.md and docs/analysis_summary.md. Before this script they were
+exported by hand, which meant a reader had no way to regenerate them and no way
+to confirm a CSV still matched the query it claimed to come from.
 
 How it works
 ------------
@@ -29,11 +29,11 @@ sql/ scripts in order first - this script only reads; it does not create the
 views the queries depend on.
 """
 
-from pathlib import Path
 import os
 import re
 import subprocess
 import sys
+from pathlib import Path
 
 # Override with RETAIL_DB=<name> if your database is called something else.
 DB = os.environ.get("RETAIL_DB", "online_retail_db")
@@ -154,6 +154,14 @@ def split_statements(sql_path):
 
 
 def export(sql_file, index, out_name):
+    """Run one statement from a .sql file and write its rows to a CSV.
+
+    Checks that the statement really is a query before running it, so a
+    shifted manifest index fails here rather than silently producing a CSV
+    labelled as one query but holding the results of another.
+
+    Returns the number of data rows written.
+    """
     statements = split_statements(SQL_DIR / sql_file)
     if index > len(statements):
         raise SystemExit(
@@ -187,6 +195,7 @@ def export(sql_file, index, out_name):
 
 
 def main():
+    """Export every query in the manifest, printing one line per file."""
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     seen = set()
     for _, _, out_name in MANIFEST:
