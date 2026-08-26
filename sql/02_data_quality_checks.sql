@@ -6,7 +6,7 @@
 --   range, missing values, cancellation volume, non-positive quantity/price,
 --   and country coverage. The results are not used in the dashboard directly
 --   - they are the evidence base for every cleaning decision made in
---   03_clean_views.sql, and they are written up in DATA_QUALITY_FINDINGS.md.
+--   03_clean_views.sql, and they are written up in docs/data_quality.md.
 --
 -- Business question answered:
 --   Is this dataset trustworthy enough to build a sales dashboard on, and

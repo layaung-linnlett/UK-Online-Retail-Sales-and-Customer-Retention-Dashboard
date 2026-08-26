@@ -42,9 +42,9 @@ measures use.
 
 Why fix one and not the other: the cancellation rate is a self-contained
 metric - correcting it changes one card and one paragraph. Net Sales is the
-denominator of nearly every figure in the README and ANALYSIS_SUMMARY, and
+denominator of nearly every figure in the README and docs/analysis_summary.md, and
 restating it would mean rewriting the entire analysis rather than disclosing a
-bounded, measured error. ANALYSIS_SUMMARY already carries both bases side by
+bounded, measured error. docs/analysis_summary.md already carries both bases side by
 side for exactly this reason. Cheap and local: fix it. Expensive and
 cascading: measure it, bracket it, and say so.
 

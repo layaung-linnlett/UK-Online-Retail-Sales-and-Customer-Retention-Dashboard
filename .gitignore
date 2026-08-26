@@ -36,8 +36,7 @@ Thumbs.db
 
 # Personal notes and local tooling
 CLAUDE.md
-STUDY_GUIDE.md
-INTERVIEW_NOTES.md
+notes/
 .claude/
 
 # Note: files over ~50 MB should not be committed. Use Git LFS or a download

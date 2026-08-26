@@ -2,7 +2,7 @@
 
 Click-by-click instructions for building the three-page dashboard from scratch. Written assuming you have never opened Power BI before.
 
-**Everything before this point is already done.** The database `online_retail_db` exists, the SQL scripts have run, and the views are built. If that is not true yet, go back to [How to Run](README.md#how-to-run) in the README and finish it first — nothing here works without it.
+**Everything before this point is already done.** The database `online_retail_db` exists, the SQL scripts have run, and the views are built. If that is not true yet, go back to [How to Run](../README.md#how-to-run) in the README and finish it first — nothing here works without it.
 
 ---
 
@@ -222,7 +222,7 @@ The leading underscore matters. Power BI reserves the exact name `Measures` for 
 
 ## 2.6 Add the fourteen measures
 
-Open [powerbi/dax_measures.txt](powerbi/dax_measures.txt) in a text editor. It has all fourteen with the exact DAX and an explanation of each.
+Open [powerbi/dax_measures.txt](../powerbi/dax_measures.txt) in a text editor. It has all fourteen with the exact DAX and an explanation of each.
 
 For **each** measure:
 
@@ -260,7 +260,7 @@ Click a measure in the Data pane, then use the **Measure tools** ribbon.
 
 Turn on the thousands separator for the whole numbers — it is the comma in `18,532`. Without it your KPI cards read `18532`, which looks unfinished.
 
-> **A note on what is and is not fixed.** The cancellation rate defect described in the README's [Known issues](README.md#known-issues-found-after-the-dashboard-was-built) section **has been fixed** — see `vw_all_invoices` in `sql/03_clean_views.sql`. The Net Sales defect has **not**, deliberately: `vw_valid_sales` still counts fully cancelled orders as revenue, overstating the total by between £445,875 and £611,342. The reasoning for fixing one and not the other is at the top of `dax_measures.txt` — the rate is a self-contained metric, while Net Sales is the denominator of nearly every figure in the write-up and restating it would mean rewriting the whole analysis rather than disclosing a measured, bracketed error.
+> **A note on what is and is not fixed.** The cancellation rate defect described in the README's [What I got wrong](../README.md#what-i-got-wrong-and-what-i-did-about-it) section **has been fixed** — see `vw_all_invoices` in `sql/03_clean_views.sql`. The Net Sales defect has **not**, deliberately: `vw_valid_sales` still counts fully cancelled orders as revenue, overstating the total by between £445,875 and £611,342. The reasoning for fixing one and not the other is at the top of `dax_measures.txt` — the rate is a self-contained metric, while Net Sales is the denominator of nearly every figure in the write-up and restating it would mean rewriting the whole analysis rather than disclosing a measured, bracketed error.
 
 ---
 
@@ -428,7 +428,7 @@ A **slicer** is an on-page filter.
 | Top product | PAPER CRAFT , LITTLE BIRDIE — £168,469.60 | `05_top_10_products_by_net_sales.csv` |
 | Top international market | Netherlands — £285,446.34 | `07_top_10_countries_excl_uk.csv` |
 
-> **That top product is not a real sale.** It is an 80,995-unit order keyed at 09:15 on 2011-12-09 and reversed twelve minutes later. It is still counted because `vw_valid_sales` excludes cancellation lines without subtracting the orders they reverse. This is documented in [DATA_QUALITY_FINDINGS.md](DATA_QUALITY_FINDINGS.md) and the README's known-issues section. Leave it — the disclosure is the point.
+> **That top product is not a real sale.** It is an 80,995-unit order keyed at 09:15 on 2011-12-09 and reversed twelve minutes later. It is still counted because `vw_valid_sales` excludes cancellation lines without subtracting the orders they reverse. This is documented in [data_quality.md](data_quality.md) and the README's known-issues section. Leave it — the disclosure is the point.
 
 **If Net Sales is wrong:** check the DateTable relationship cross-filter direction is **Single** ([2.3](#23-link-the-date-table-to-the-sales-table)), and check no slicer is left part-selected from testing.
 
@@ -642,7 +642,7 @@ The README embeds these exact filenames, so keep the names identical.
 
 ## 7.4 One last thing to delete
 
-Once the new screenshots are in place, open [README.md](README.md), find the **Dashboard Screenshots** section, and delete this bullet:
+Once the new screenshots are in place, open [README.md](../README.md), find the **Dashboard Screenshots** section, and delete this bullet:
 
 > *Customer IDs read `14646.0` in the screenshots and `14646` everywhere else…*
 
