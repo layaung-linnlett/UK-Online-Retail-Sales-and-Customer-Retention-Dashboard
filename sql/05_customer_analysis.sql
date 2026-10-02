@@ -29,7 +29,7 @@ DROP VIEW IF EXISTS vw_customer_profile CASCADE;
 CREATE VIEW vw_customer_profile AS
 WITH dataset_end AS (
     SELECT MAX(order_date) AS dataset_end_date
-    FROM vw_valid_sales
+    FROM vw_valid_sales_net
 ),
 customer_summary AS (
     SELECT
@@ -40,7 +40,7 @@ customer_summary AS (
         SUM(quantity) AS total_items,
         ROUND(SUM(sales_value), 2) AS total_spend,
         ROUND(SUM(sales_value) / COUNT(DISTINCT invoice_no), 2) AS average_order_value
-    FROM vw_valid_sales
+    FROM vw_valid_sales_net
     GROUP BY customer_id
 )
 SELECT

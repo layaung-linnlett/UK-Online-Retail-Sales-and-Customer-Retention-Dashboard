@@ -64,31 +64,13 @@ WHERE EXISTS (
 
 
 -- ----------------------------------------------------------------------------
--- 2. The corrected sales view. Added alongside vw_valid_sales, not replacing it.
+-- 2. The corrected sales view now lives in 03_clean_views.sql
 --
---    NOTE ON CASCADE: scripts 08 and 11 build views on top of
---    vw_valid_sales_net, so dropping it with CASCADE drops those too. That is
---    intentional - a stale dependent view is worse than a missing one - but it
---    means re-running THIS script on its own leaves 08 and 11 needing to be
---    re-run before their queries will work again. Running the scripts in order
---    from 07 onward always leaves the database consistent.
+--    vw_valid_sales_net used to be created here, alongside vw_valid_sales. It
+--    moved to 03 when it became the headline basis, because scripts 04-06
+--    build on it and run before this one. Creating it here as well would drop
+--    those scripts' views via CASCADE. It is defined once, in 03.
 -- ----------------------------------------------------------------------------
-DROP VIEW IF EXISTS vw_valid_sales_net CASCADE;
-
-CREATE VIEW vw_valid_sales_net AS
-SELECT s.*
-FROM vw_valid_sales AS s
-WHERE NOT EXISTS (
-    SELECT 1
-    FROM vw_cancellations AS c
-    WHERE c.customer_id    = s.customer_id
-      AND c.stock_code     = s.stock_code
-      AND c.unit_price     = s.unit_price
-      AND ABS(c.quantity)  = s.quantity
-      AND c.quantity       < 0
-      AND c.invoice_date  >= s.invoice_date
-);
-
 
 -- ----------------------------------------------------------------------------
 -- 3. Restated headline totals: as published vs corrected

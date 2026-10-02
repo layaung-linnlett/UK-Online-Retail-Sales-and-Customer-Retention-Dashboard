@@ -1,4 +1,4 @@
 list,customers,total_spend
-A. Old rule: high-value at risk (90d + GBP1k),195,471684.33
-"B. Old rule: all at-risk repeat (90d, no spend floor)",602,678131.91
-C. New rule: overdue on own cadence (2x median),224,462554.75
+A. Old rule: high-value at risk (90d + GBP1k),191,440689.14
+"B. Old rule: all at-risk repeat (90d, no spend floor)",601,647781.64
+C. New rule: overdue on own cadence (2x median),219,427266.82

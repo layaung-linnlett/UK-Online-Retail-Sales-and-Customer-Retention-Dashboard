@@ -1,5 +1,5 @@
 cadence_segment,customers,total_spend,avg_spend_per_customer,avg_of_median_gaps,avg_days_quiet
-Active - within own cadence,1692,6874196.04,4062.76,57.0,28.2
-Two purchases - cadence unreliable,874,869915.49,995.33,119.6,90.2
-Single purchase - no cadence,1548,704741.62,455.26,,155.6
-At risk - overdue on own cadence,224,462554.75,2064.98,34.7,142.7
+Active - within own cadence,1685,6738526.46,3999.13,57.1,28.1
+Two purchases - cadence unreliable,878,680903.63,775.52,119.4,90.8
+Single purchase - no cadence,1545,618836.25,400.54,,156.1
+At risk - overdue on own cadence,219,427266.82,1950.99,35.1,143.7

@@ -19,7 +19,7 @@ These are the actual results of running [sql/02_data_quality_checks.sql](../sql/
 | customer_id | 135,080 | 24.93% |
 | country | 0 | 0.00% |
 
-`customer_id` is the big one: almost a quarter of all line items have no customer attached. These are dropped from `vw_valid_sales` and from every customer-level query, because there's no way to attribute them to a customer. It also means the customer-level totals in this project (4,338 identified customers, £8.9m net sales) understate the retailer's true total activity, since they only cover the ~75% of transactions that carry a customer ID.
+`customer_id` is the big one: almost a quarter of all line items have no customer attached. These are dropped from `vw_valid_sales` and from every customer-level query, because there's no way to attribute them to a customer. It also means the customer-level totals in this project (4,327 identified customers, £8.5m net sales) understate the retailer's true total activity, since they only cover the ~75% of transactions that carry a customer ID.
 
 ## Cancellations
 
@@ -43,23 +43,26 @@ Non-positive quantity is larger than the cancellation line count (9,288) because
 
 38 distinct country values are present, including a few that aren't really countries: `Unspecified` (13 invoices) and `European Community` (5 invoices). These weren't recoded or dropped. They're left as-is in the raw data and simply show up as small, low-volume rows in the country breakdown. `United Kingdom` dominates the dataset by a wide margin (23,494 of the 25,900 invoices across all countries in the raw counts), which matches this being "a UK-based non-store retailer" per the dataset description, and international sales are a small, deliberately separate slice of the business (see the "excluding UK" queries in `04_sales_analysis.sql`).
 
-## After cleaning: `vw_valid_sales`
+## After cleaning: `vw_valid_sales` and `vw_valid_sales_net`
 
-Running the sanity check at the bottom of `03_clean_views.sql`:
+`vw_valid_sales` applies the cleaning rules. `vw_valid_sales_net` then removes the
+sale lines that a later cancellation reversed, and is the basis for every sales
+and customer figure. Running the sanity check at the bottom of
+`03_clean_views.sql` (first column) and the same totals on the net view:
 
-| Metric | Value |
-|---|---|
-| Valid sales lines | 397,880 |
-| Valid orders (distinct invoices) | 18,532 |
-| Identified customers | 4,338 |
-| Net sales | £8,911,407.90 |
+| Metric | `vw_valid_sales` (cleaned) | `vw_valid_sales_net` (headline) |
+|---|---:|---:|
+| Sales lines | 397,880 | 393,993 |
+| Orders (distinct invoices) | 18,532 | 18,366 |
+| Identified customers | 4,338 | 4,327 |
+| Net sales | £8,911,407.90 | £8,465,533.16 |
 
 397,880 of 541,909 raw rows (73.4%) survive the cleaning rules in `vw_valid_sales`. The other ~26.6% is accounted for by cancellations, missing customer IDs, missing descriptions, and non-positive quantity/price. These categories overlap (e.g. a cancelled row often also has negative quantity), so they don't sum cleanly to the excluded total, but each one is independently verifiable by re-running `02_data_quality_checks.sql`.
 
 ## Things that looked statistically odd and are worth flagging honestly
 
 - **Customer IDs used to read "17850.0" instead of "17850". Fixed.** Roughly a quarter of the CustomerID cells are blank, and a plain whole-number column has nowhere to store "missing", so pandas converted the entire column to decimals to make room, turning every ID into `17850.0`. The `quantity` column is the control case: same kind of number, no blanks, and it came through as `6` / `56` / `80995` untouched. `src/01_excel_to_csv.py` now casts the column to pandas' nullable integer type (`Int64`), which holds whole numbers and blanks at the same time. Re-running the pipeline changed 406,829 ID values from `NNNNN.0` to `NNNNN` and **changed no other value anywhere**: 57 of the 64 exported CSVs are byte-identical, and the other 7 differ only in that column.
-- **One single order for "PAPER CRAFT , LITTLE BIRDIE" was for 80,995 units**, more than five times the size of the largest genuine order in the dataset, which was 15,049 units. (The next-largest line, 74,215 units, turns out to be a reversed order too.) When I wrote this file I recorded it as a bulk or wholesale purchase and kept it in the data. **That was wrong.** Invoice `581483` was keyed at 09:15 on 2011-12-09 and reversed by `C581484` at 09:27 the same morning — a data-entry error corrected twelve minutes later, not a sale. It is still in `vw_valid_sales`, because that view excludes cancellation lines without subtracting the orders they reverse. See `sql/07_revenue_concentration.sql` and the "Known issues" section of the README.
+- **One single order for "PAPER CRAFT , LITTLE BIRDIE" was for 80,995 units**, more than five times the size of the largest genuine order in the dataset, which was 15,049 units. (The next-largest line, 74,215 units, turns out to be a reversed order too.) When I wrote this file I recorded it as a bulk or wholesale purchase and kept it in the data. **That was wrong.** Invoice `581483` was keyed at 09:15 on 2011-12-09 and reversed by `C581484` at 09:27 the same morning — a data-entry error corrected twelve minutes later, not a sale. It is still in `vw_valid_sales`, because that view excludes cancellation lines without subtracting the orders they reverse; `vw_valid_sales_net` removes it. See `sql/07_revenue_concentration.sql` and the "Known issues" section of the README.
 - **One customer appeared to have spent £168,472.50 across 2 orders** (average order value £84,236.25). That was the 4th-highest spender in the whole dataset. I originally recorded this as a genuine outlier customer. **It is not a customer at all.** Customer `16446`'s large order is the reversed invoice `581483` above. Their genuine lifetime spend is **£2.90** — two brushes. Measured on the corrected view `vw_valid_sales_net`, they do not appear in the top 10.
 - **One customer appeared to have placed exactly 1 order worth £77,183.60**. That was the 10th-highest spend in the whole dataset. Same defect again: customer `12346`'s invoice `541431` (74,215 units) was reversed by `C541433` sixteen minutes later. Their genuine lifetime spend is **£0.00**.
 - **The "one-time customer" rule still cannot tell "bought once, cheaply" from "bought once, enormously."** That limitation is real and separate from the reversal defect above, and it is called out in the README's limitations section.
@@ -67,5 +70,5 @@ Running the sanity check at the bottom of `03_clean_views.sql`:
 ## What this means for the dashboard
 
 - Every chart on the Sales and Customer pages of the dashboard is built from the cleaned data, which represents about 73% of the original transaction lines and about 75% of transactions that had a customer attached to them. That exclusion is real and disclosed here, not silently dropped.
-- Cancellations are shown on their own separate dashboard page rather than being subtracted from the sales figures, so the sales numbers reflect everything sold (before cancellations), and the cancellations page shows their scale independently.
+- Cancellations are shown on their own separate dashboard page rather than being subtracted from the sales figures, so the sales numbers are net only of the sale lines that a later cancellation exactly reversed, and the cancellations page shows the full scale of cancellations independently.
 - The "high-value" and "at-risk" customer categories come from a simple, clearly documented rule (2 or more orders, £1,000 or more spent in total, and no order in the last 90 days counting from the dataset's own final transaction date), not a predictive model. The two outlier customers above are the clearest examples of where a simple rule like this starts to break down.

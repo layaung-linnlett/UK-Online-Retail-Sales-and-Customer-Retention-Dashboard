@@ -5,8 +5,8 @@
 A Power BI dashboard and SQL analysis built on 541,909 transactions from a UK
 online gift retailer, covering December 2010 to December 2011.
 
-Reviewing the finished work, I found four errors in my own numbers. One is
-fixed. The other three are measured and disclosed: see
+Reviewing the finished work, I found four errors in my own numbers. Two are
+fixed. The other two are measured and disclosed: see
 [What I got wrong](#what-i-got-wrong-and-what-i-did-about-it).
 
 ---
@@ -28,7 +28,7 @@ whether the reported numbers are sound enough to spend against.
 
 **Why it matters here:** revenue is concentrated. It takes 27% of customers to
 reach 80% of revenue. The ten largest are worth 70 average customers each, and
-replacing all ten would take 703 of them (corrected basis). At that
+replacing all ten would take 703 of them. At that
 concentration, a handful of established buyers carry revenue it would take
 hundreds of average customers to replace. Knowing *which* ones are drifting is
 worth more than knowing the total.
@@ -57,12 +57,13 @@ order; Power BI connects to the views and holds fourteen DAX measures.
 | Non-positive price | 2,521 | Same |
 | No customer ID | 135,080 (24.93%) | Cannot be attributed to a customer |
 
-**One thing to know before reading any number below.** Two revenue bases exist
-in this project. The *published* basis (£8,911,407.90) is what the dashboard
-reports and what the original analysis used. The *corrected* basis
-(£8,465,533.16) removes sale lines that a later cancellation reversed, a defect
-I found afterwards. Figures below say which basis they use wherever it matters.
-Both are set out in [docs/analysis_summary.md](docs/analysis_summary.md).
+**One thing to know before reading any number below.** Net sales is
+£8,465,533.16: every sale line that a later cancellation reversed is removed.
+The first version of the dashboard reported £8,911,407.90 because it counted
+those lines as revenue, an error I found afterwards and have since fixed. The
+original view (`vw_valid_sales`) is kept unchanged so the old figures, and the
+size of the error, stay reproducible. The comparison is in
+[docs/analysis_summary.md](docs/analysis_summary.md).
 
 **Verification.** Every number quoted here is produced by a query in `sql/` and
 written to a CSV in [`outputs/query_results/`](outputs/query_results/) by a
@@ -80,15 +81,14 @@ sums, is in [docs/findings.md](docs/findings.md).
 ### 1. The customers most worth keeping were not on the at-risk list
 
 **Observation.** A fixed rule (two or more orders, £1,000+ spent, silent
-for 90+ days) returned 195 customers holding £471,684.33 of historical spend
-(published basis). Testing each customer against their *own* median gap between
-purchases instead returns 219 customers and £427,266.82 (corrected basis). Only
-86 names appear on both lists.
+for 90+ days) returned 191 customers holding £440,689.14 of historical spend.
+Testing each customer against their *own* median gap between purchases instead
+returns 219 customers and £427,266.82. Only 84 names appear on both lists.
 
 **Insight.** A single 90-day threshold treats a customer who buys weekly and one
 who buys quarterly as the same person. It is wrong in both directions. Customer
-`16029`, the 11th largest customer in the business, buys every 7.5 days and
-had been silent for 38 days, five times their own rhythm. The 90-day rule
+`16029`, the 11th largest customer in the business, buys every 8 days and
+had been silent for 38 days, nearly five times their own rhythm. The 90-day rule
 classified them "High-value active" and put them on no list at all.
 
 **Implication.** The original list sent budget towards slow buyers behaving
@@ -125,9 +125,8 @@ before acting on it.
 
 ### 3. The repeat-purchase problem is half the size it appears
 
-**Observation.** 34% of customers appear to buy only once (1,493 of 4,338,
-published basis). Given a fair 270-day window in which to return, the rate is
-17.9% (corrected basis).
+**Observation.** 34% of customers appear to buy only once (1,490 of 4,327).
+Given a fair 270-day window in which to return, the rate is 17.9%.
 
 **Insight.** The naive rate counts a customer who first bought in November as a
 failure by December. The median second purchase takes 57 days, which is 2.6×
@@ -146,15 +145,15 @@ purchase within 60 days, before and after.
 
 ### 4. December is not a collapse
 
-**Observation.** Monthly sales run from £447,137.35 in February to
-£1,161,817.38 in November, a 2.6× swing. The December bar then falls off a
+**Observation.** Monthly sales run from £442,782.04 in February to
+£1,144,117.11 in November, a 2.6× swing. The December bar then falls off a
 cliff.
 
 **Insight.** Two artefacts, not a business event. The dataset stops on 9
 December, so December is a nine-day month charted against thirty-day ones, and
-£168,469.60 of what it does record is the phantom order from finding 2. Per
-calendar day, December ran at £38,858 against November's £38,727, within a third
-of a percent.
+the phantom order from finding 2 (£168,469.60) sat inside it until the sales
+figures were netted of reversed orders. Per calendar day, December ran at
+£38,758 against November's £38,137, within 2%.
 
 **Implication.** Anyone reading that bar at face value would plan the following
 year around a crash that never happened.
@@ -166,23 +165,21 @@ operational strain.
 
 ### 5. Two of the four "international markets" are single accounts
 
-**Observation.** Netherlands £285,446.34 from 9 customers; EIRE £265,545.90
-from 3; Germany £228,867.14 from 94; France £209,024.05 from 87. Read as sales
-per customer that gives the Netherlands £31,716 and EIRE £88,515, against
+**Observation.** Netherlands £284,143.74 from 9 customers; EIRE £250,576.05
+from 3; Germany £225,087.17 from 94; France £205,352.44 from 87. Read as sales
+per customer that gives the Netherlands £31,572 and EIRE £83,525, against
 roughly £2,400 for Germany and France.
 
 **Insight.** Those two averages describe nobody. The largest customer in the
 entire business is Dutch, and two of the ten largest are Irish. One Dutch
-customer accounts for at least 97.7% of Dutch revenue, leaving the other eight
-about £810 each. Two Irish customers account for at least 92.7% of Irish
+customer accounts for 98.2% of Dutch revenue, leaving the other eight
+about £650 each. Two Irish customers account for 98.3% of Irish
 revenue. Germany and France are genuinely different: roughly 90 customers each,
 at a value per customer in line with an ordinary repeat buyer.
 
-*(Those two shares are lower bounds. The country totals are on the published
-basis and the customer figures on the corrected basis, and correcting only ever
-removes revenue, so the true concentration is at least this high. Sources:
-[`06_sales_by_country.csv`](outputs/query_results/06_sales_by_country.csv) and
-[`33_top_10_customers_corrected.csv`](outputs/query_results/33_top_10_customers_corrected.csv).)*
+*(Sources: [`06_sales_by_country.csv`](outputs/query_results/06_sales_by_country.csv)
+and [`33_top_10_customers_corrected.csv`](outputs/query_results/33_top_10_customers_corrected.csv),
+both on the same net-of-reversals basis.)*
 
 **Implication.** "Grow the Netherlands" is not a strategy that can be costed
 from this data, because there is no such thing as an average Dutch customer to
@@ -228,9 +225,11 @@ The report file is in the repository at
 [`powerbi/online_retail_dashboard.pbix`](powerbi/online_retail_dashboard.pbix)
 and opens without a database, since the data is imported rather than live.
 
-One number on these pages is knowingly wrong and left that way on purpose: Net
-Sales of £8,911,407.90 counts fully cancelled orders as revenue. That is the
-unfixed defect described below.
+**Note:** the SQL, the exported CSVs and the DAX measures use the corrected net
+sales basis (£8,465,533.16). The report file and screenshots below were built
+on the earlier basis (£8,911,407.90) and need refreshing in Power BI Desktop
+before they match: see the checklist in
+[docs/powerbi_build_guide.md](docs/powerbi_build_guide.md).
 
 **1. Sales performance overview.** Net sales, orders, customers, average order
 value, the monthly trend, top products and international markets.
@@ -238,8 +237,8 @@ value, the monthly trend, top products and international markets.
 ![Sales performance overview](outputs/figures/page1_sales_overview.jpg)
 
 **2. Customer retention and value.** All five customer segments (summing to
-4,338, matching Unique Customers on page 1), highest-spending customers, and the
-195-name call list behind finding 1.
+4,327, matching Unique Customers on page 1), highest-spending customers, and the
+191-name call list behind finding 1.
 
 ![Customer retention and value](outputs/figures/page2_customer_retention.jpg)
 
@@ -253,8 +252,9 @@ with its December spike, and the composition chart behind finding 2.
 ## What I got wrong, and what I did about it
 
 Reviewing the finished dashboard, I found four errors in my own work. The rule I
-applied: **cheap and local, fix it; expensive and cascading, measure it, bracket
-it, and say so.**
+applied: **cheap and local, fix it; expensive and cascading, measure it and
+bracket it first, then fix it once the size is known.** Two are now fixed; two
+are measured and disclosed.
 
 ### Fixed: the cancellation rate was overstated, and broke under filtering
 
@@ -277,18 +277,31 @@ each carrying a date, and both halves now count from it.
 | Full period | 17.15% | 14.81% |
 | Filtered to February 2011 | 79.37% | 15.72% |
 
-### Measured, not fixed: "Net Sales" is not net of returns
+### Fixed: "Net Sales" was not net of returns
 
 A cancellation is a separate invoice beginning with `C`. The original positive
 sale line stays in the data under its own number and passes every cleaning
-filter, so an order that was placed and then cancelled still counts as revenue,
-while the cancellation that reversed it counts as nothing.
+filter, so an order that was placed and then cancelled still counted as revenue,
+while the cancellation that reversed it counted as nothing.
 
-Matching each cancellation to the exact sale line it reverses identifies
+Matching each cancellation to the exact sale line it reverses (same customer,
+product, unit price and quantity, cancelled on or after the sale) identifies
 £445,874.74 across 3,887 lines and 792 customers, exactly 5.00% of reported net
-sales. Including cancellations that carry a customer ID but no exact match
-raises it to £611,342. So the overstatement is bounded between those two, and
-true net sales for identified customers lies between £8,300,066 and £8,465,533.
+sales. `vw_valid_sales_net` in
+[sql/03_clean_views.sql](sql/03_clean_views.sql) removes those lines, and every
+sales, customer, cadence and cohort query now runs on it.
+
+| | Before | After |
+|---|---:|---:|
+| Net sales | £8,911,407.90 | £8,465,533.16 |
+| Orders | 18,532 | 18,366 |
+| Customers | 4,338 | 4,327 |
+
+**What is not fixed.** Cancellations that carry a customer ID but match no sale
+exactly are not removed, because they cannot be tied to a specific line.
+Including them would raise the correction to £611,342, so true net sales for
+identified customers lies between £8,300,066 and £8,465,533. The headline uses
+the lower correction because every line of it can be listed and checked.
 
 ### Measured, not fixed: the sales totals exclude rows they did not need to
 
@@ -297,19 +310,19 @@ group by an ID that is not there. It is wrong for the sales pages, where those
 rows still carry a valid date, product, quantity and price. The 135,080 rows
 without a customer ID are worth £1,755,277.
 
-The two sales-total errors work in opposite directions and partly cancel, which
-is worse than either alone: the headline looks plausible while resting on two
-separate mistakes.
+With the reversed orders now removed, this error works in one direction only:
+net sales leaves out rows worth £1,755,277 that carry no customer ID, so it
+understates the business's sales. It is a known limit and the largest
+uncorrected figure in this project.
 
-**Why I fixed one and not the others.** The cancellation rate is self-contained:
-correcting it changed one card. Net Sales is the denominator of nearly every
-figure in this project; restating it would mean rewriting the whole analysis
-rather than disclosing a bounded error already measured to the pound. A
-corrected view, `vw_valid_sales_net`, exists in
-[sql/07_revenue_concentration.sql](sql/07_revenue_concentration.sql) for anyone
-who wants to run it the other way, and
-[docs/analysis_summary.md](docs/analysis_summary.md) carries both bases side by
-side.
+**Why I fixed one at first and not the others.** The cancellation rate is
+self-contained: correcting it changed one card. Net Sales was the denominator of
+nearly every figure in this project, so I first measured and bracketed the
+error instead of restating everything. I have since restated it, because
+leaving a known error in a headline number is the wrong trade-off for anyone who
+might spend against it. The original view, `vw_valid_sales`, is kept so the old
+numbers reproduce, and [docs/analysis_summary.md](docs/analysis_summary.md)
+carries both bases side by side.
 
 ---
 
@@ -385,9 +398,10 @@ psql -d online_retail_db -f sql/01_create_table.sql
 
 ### 4. Run the SQL, in order
 
-Scripts `02`–`05` build the original dashboard. Scripts `06`–`11` are the 2026
-follow-up; they add new views rather than modifying the originals, so every
-published figure still reproduces. They depend on the earlier views, so order
+Scripts `02`–`05` build the dashboard's views. Scripts `06`–`11` are the 2026
+follow-up. The original, uncorrected sales view (`vw_valid_sales`) is kept
+alongside the corrected `vw_valid_sales_net` that everything now builds on, so
+the old figures still reproduce. They depend on the earlier views, so order
 matters.
 
 ```bash

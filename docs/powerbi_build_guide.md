@@ -100,15 +100,19 @@ Leave the level set to the database itself, so the credential is remembered for 
 A **Navigator** window opens listing everything in the database.
 
 1. Tick exactly these four:
-   * `vw_valid_sales`
+   * `vw_valid_sales_net` (sales net of reversed orders: you will rename it in a moment)
    * `vw_cancellations`
    * `vw_customer_profile`
    * `vw_all_invoices`
 2. **Do not tick `online_retail_raw`.** That is the unfiltered raw table including cancellations, blank customer IDs and invalid rows. Putting it in the report is how you end up with two different "total sales" numbers on the same page.
-3. **Do not tick the `06`–`11` views** (`vw_customer_cadence`, `vw_valid_sales_net`, etc.). Those belong to the 2026 follow-up analysis and are not part of this report.
+3. **Do not tick `vw_valid_sales`** (the old basis that counted reversed orders as revenue) or the `06`–`11` views (`vw_customer_cadence`, etc.). Those belong to the comparison and the 2026 follow-up analysis, not this report.
 4. Click **Load** (not Transform Data — there is nothing to transform; the cleaning already happened in SQL).
 
-Loading takes a minute or two. `vw_valid_sales` has about 398,000 rows.
+Loading takes a minute or two. `vw_valid_sales_net` has about 394,000 rows.
+
+**Rename the table.** In the Data pane, right-click `vw_valid_sales_net` → **Rename** → `vw_valid_sales`. Every DAX measure in `powerbi/dax_measures.txt` refers to that table name, so keeping the name means the measures work unchanged and only the numbers move to the corrected basis.
+
+**Updating an existing report instead of rebuilding it:** Transform data → select the `vw_valid_sales` table → in Applied steps open the **Navigation** step and change the view to `vw_valid_sales_net` → Close & Apply → Refresh. Then re-check every number against the tables in Parts 4 and 5, and replace the screenshots ([7.3](#73-screenshots)).
 
 **Check it worked:** the Data pane on the right should now show four tables. Click the arrow next to `vw_valid_sales` to expand it — you should see `sales_value`, `order_date`, `product_name`, `country` and the rest.
 
@@ -258,9 +262,9 @@ Click a measure in the Data pane, then use the **Measure tools** ribbon.
 | Cancellation Rate | Percentage | 2 |
 | Everything else | Whole number, with thousands separator | 0 |
 
-Turn on the thousands separator for the whole numbers — it is the comma in `18,532`. Without it your KPI cards read `18532`, which looks unfinished.
+Turn on the thousands separator for the whole numbers — it is the comma in `18,366`. Without it your KPI cards read `18366`, which looks unfinished.
 
-> **A note on what is and is not fixed.** The cancellation rate defect described in the README's [What I got wrong](../README.md#what-i-got-wrong-and-what-i-did-about-it) section **has been fixed** — see `vw_all_invoices` in `sql/03_clean_views.sql`. The Net Sales defect has **not**, deliberately: `vw_valid_sales` still counts fully cancelled orders as revenue, overstating the total by between £445,875 and £611,342. The reasoning for fixing one and not the other is at the top of `dax_measures.txt` — the rate is a self-contained metric, while Net Sales is the denominator of nearly every figure in the write-up and restating it would mean rewriting the whole analysis rather than disclosing a measured, bracketed error.
+> **A note on what is fixed.** The cancellation rate defect described in the README's [What I got wrong](../README.md#what-i-got-wrong-and-what-i-did-about-it) section is fixed: see `vw_all_invoices` in `sql/03_clean_views.sql`. So is the Net Sales defect: the report reads `vw_valid_sales_net`, which removes sale lines that a later cancellation reversed, so Net Sales is £8,465,533.16, not £8,911,407.90. What remains is disclosed: cancellations with a customer ID but no exact matching sale are not removed (up to a further £165,467), and rows with no customer ID are excluded from the sales totals.
 
 ---
 
@@ -319,7 +323,7 @@ If you genuinely cannot fit ten, show five and retitle it *Top 5*. An honest Top
 
 ## 3.4 Turn off totals that mean nothing
 
-Table visuals add a bold Total row at the bottom by default, and it sums **every** numeric column — including ones where a sum is meaningless. Adding up "days since last order" across 195 customers produces `30,555`, a number describing nothing.
+Table visuals add a bold Total row at the bottom by default, and it sums **every** numeric column — including ones where a sum is meaningless. Adding up "days since last order" across 191 customers produces `30,132`, a number describing nothing.
 
 **To fix:**
 
@@ -368,12 +372,12 @@ For each: **Insert** → **Visual** → **Card**, then drag the measure into the
 
 | Card | Measure | Should show |
 |---|---|---|
-| 1 | `Net Sales` | £8,911,407.90 |
-| 2 | `Total Orders` | 18,532 |
-| 3 | `Unique Customers` | 4,338 |
-| 4 | `Average Order Value` | £480.87 |
+| 1 | `Net Sales` | £8,465,533.16 |
+| 2 | `Total Orders` | 18,366 |
+| 3 | `Unique Customers` | 4,327 |
+| 4 | `Average Order Value` | £460.94 |
 
-**For each card:** open the **Format pane** — that is the **paintbrush icon inside the Visualizations pane**, not the Format tab on the ribbon ([see 3.2](#32-write-your-own-chart-title)) — then **Visual** tab → **Callout value** → set **Display units** to **None**, so it shows `£8,911,407.90` and not `£8.91M`. Then **General** tab → **Title** → on, and name it.
+**For each card:** open the **Format pane** — that is the **paintbrush icon inside the Visualizations pane**, not the Format tab on the ribbon ([see 3.2](#32-write-your-own-chart-title)) — then **Visual** tab → **Callout value** → set **Display units** to **None**, so it shows `£8,465,533.16` and not `£8.47M`. Then **General** tab → **Title** → on, and name it.
 
 **Also turn the card's built-in label off**, or the name appears twice — once as your Title above the number and again as small grey text below it: **Visual** tab → **Category label** → **Off**.
 
@@ -421,10 +425,10 @@ A **slicer** is an on-page filter.
 
 | What | Expected | Source file |
 |---|---|---|
-| Net Sales | £8,911,407.90 | `outputs/query_results/02_overall_kpis.csv` |
-| Total Orders | 18,532 | same |
-| Unique Customers | 4,338 | same |
-| Average Order Value | £480.87 | same |
+| Net Sales | £8,465,533.16 | `outputs/query_results/02_overall_kpis.csv` |
+| Total Orders | 18,366 | same |
+| Unique Customers | 4,327 | same |
+| Average Order Value | £460.94 | same |
 | Top product | PAPER CRAFT , LITTLE BIRDIE — £168,469.60 | `05_top_10_products_by_net_sales.csv` |
 | Top international market | Netherlands — £285,446.34 | `07_top_10_countries_excl_uk.csv` |
 
@@ -444,16 +448,16 @@ Text box title: **Customer Retention and Value**. Add the same subtitle style as
 
 | Card | Measure | Should show |
 |---|---|---|
-| 1 | `High-Value Active Customers` | 1,399 |
-| 2 | `One-Time Customers` | 1,493 |
-| 3 | `Active Repeat Customers` | **844** |
-| 4 | `At-Risk Repeat Customers` | 407 |
-| 5 | `High-Value At-Risk Customers` | 195 |
+| 1 | `High-Value Active Customers` | 1,386 |
+| 2 | `One-Time Customers` | 1,490 |
+| 3 | `Active Repeat Customers` | **850** |
+| 4 | `At-Risk Repeat Customers` | 410 |
+| 5 | `High-Value At-Risk Customers` | 191 |
 
-**All five, not four.** There are five segments. The earlier build had four cards, so the page showed 3,494 customers while Page 1 said 4,338 — 844 unaccounted for. Anyone checking your arithmetic finds that in about twenty seconds.
+**All five, not four.** There are five segments. The earlier build had four cards, so the page showed 3,477 customers while Page 1 said 4,327 — 850 unaccounted for. Anyone checking your arithmetic finds that in about twenty seconds.
 
 ```
-1,399 + 1,493 + 844 + 407 + 195 = 4,338 ✓
+1,386 + 1,490 + 850 + 410 + 191 = 4,327 ✓
 ```
 
 Colour them by urgency (Format → General → Effects → Background): green for High-Value Active, neutral grey for One-Time and Active Repeat, amber for At-Risk Repeat, red for High-Value At-Risk. On a retention page that is a genuine reading aid, not decoration.
@@ -502,16 +506,16 @@ This is the actionable output of the whole page: a call list.
 
 | What | Expected | Source file |
 |---|---|---|
-| High-Value Active | 1,399 | `outputs/query_results/13_customer_segment_summary.csv` |
-| One-Time | 1,493 | same |
-| Active Repeat | 844 | same |
-| At-Risk Repeat | 407 | same |
-| High-Value At-Risk | 195 | same |
-| **Five cards summed** | **4,338** — must equal Unique Customers on Page 1 | |
+| High-Value Active | 1,386 | `outputs/query_results/13_customer_segment_summary.csv` |
+| One-Time | 1,490 | same |
+| Active Repeat | 850 | same |
+| At-Risk Repeat | 410 | same |
+| High-Value At-Risk | 191 | same |
+| **Five cards summed** | **4,327** — must equal Unique Customers on Page 1 | |
 | Top customer | 14646 — £280,206.02 | `15_top_20_customers_by_spend.csv` |
-| At-risk table row count | 195 | `14_retention_priority_high_value_at_risk.csv` |
+| At-risk table row count | 191 | `14_retention_priority_high_value_at_risk.csv` |
 
-**If the five don't sum to 4,338:** you have almost certainly created a relationship between `DateTable` and `vw_customer_profile`. Go to Model view and delete it ([2.3](#23-link-the-date-table-to-the-sales-table)).
+**If the five don't sum to 4,327:** you have almost certainly created a relationship between `DateTable` and `vw_customer_profile`. Go to Model view and delete it ([2.3](#23-link-the-date-table-to-the-sales-table)).
 
 ---
 
@@ -600,8 +604,8 @@ Go page by page. Every item is a defect that was visible in the previous screens
 - [ ] **No scrollbars on any visual.** Any chart claiming "Top 10" shows ten ([3.3](#33-make-a-chart-big-enough-for-its-own-data)).
 - [ ] **No table row cut off** at the bottom edge of its visual.
 - [ ] **No meaningless totals.** Nothing sums days, dates, averages or percentages ([3.4](#34-turn-off-totals-that-mean-nothing)).
-- [ ] **Page 2's five cards sum to 4,338.**
-- [ ] **Thousands separators on.** `18,532` not `18532`.
+- [ ] **Page 2's five cards sum to 4,327.**
+- [ ] **Thousands separators on.** `18,366` not `18366`.
 - [ ] **Currency symbols present.** `£896,812.49` not `896.81K`.
 - [ ] **Titles and subtitles consistent** across all three pages.
 - [ ] **No duplicated labels on cards** — Title on, Category label off, not both.

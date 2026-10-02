@@ -10,21 +10,22 @@ Rebuild all of them with:
 python src/02_export_query_results.py
 ```
 
-## Read this first: two bases for every revenue number
+## Read this first: one headline basis, one kept for comparison
 
 This analysis found a defect in the original cleaning logic (see §2 below).
-`vw_valid_sales` counts fully cancelled orders as revenue. It was **not**
-modified. The original view still reproduces every published dashboard number.
-A corrected view, `vw_valid_sales_net`, was added alongside it.
+`vw_valid_sales` counted fully cancelled orders as revenue. That is now fixed:
+every sales, customer, cadence and cohort figure here is built on
+`vw_valid_sales_net`, which removes the sale lines a later cancellation
+reversed. The original view is kept unchanged so the old figures stay
+reproducible.
 
 | Basis | View | Lines | Customers | Net sales |
 |---|---|---:|---:|---:|
-| As published | `vw_valid_sales` | 397,880 | 4,338 | £8,911,407.90 |
-| Corrected | `vw_valid_sales_net` | 393,993 | 4,327 | £8,465,533.16 |
+| Before the fix | `vw_valid_sales` | 397,880 | 4,338 | £8,911,407.90 |
+| **Headline (corrected)** | `vw_valid_sales_net` | 393,993 | 4,327 | £8,465,533.16 |
 
-**Always say which basis a number is on.** Q1's before/after comparison uses the
-published basis so it is like-for-like with the original 195. Everything from Q2
-onward uses the corrected basis.
+Figures that changed are shown with their before-the-fix value where the
+comparison matters. Everything else is on the corrected basis.
 
 ---
 
@@ -34,9 +35,10 @@ onward uses the corrected basis.
 |---|---:|---|
 | Raw rows loaded | 541,909 | `sql/02_data_quality_checks.sql` |
 | Rows missing customer ID | 135,080 (24.93%) | `sql/02_data_quality_checks.sql` |
-| Valid sales lines (published) | 397,880 | `sql/03_clean_views.sql` sanity check |
-| Identified customers (published) | 4,338 | `sql/03_clean_views.sql` sanity check |
-| Net sales (published) | £8,911,407.90 | `sql/03_clean_views.sql` sanity check |
+| Valid sales lines (before the fix) | 397,880 | `sql/03_clean_views.sql` sanity check |
+| Identified customers (before the fix) | 4,338 | `sql/03_clean_views.sql` sanity check |
+| Net sales (before the fix) | £8,911,407.90 | `sql/03_clean_views.sql` sanity check |
+| **Net sales (headline, net of reversed orders)** | **£8,465,533.16** | `sql/03_clean_views.sql` → [`02_overall_kpis.csv`](../outputs/query_results/02_overall_kpis.csv) |
 | Date range | 2010-12-01 to 2011-12-09 | `sql/02_data_quality_checks.sql` |
 
 ## 2. The defect found during this work
@@ -49,9 +51,9 @@ onward uses the corrected basis.
 | As share of reported net sales | **5.00%** | `sql/07_revenue_concentration.sql` §1 → [`29_reversal_defect_quantified.csv`](../outputs/query_results/29_reversal_defect_quantified.csv) |
 | Corrected net sales | £8,465,533.16 | `sql/07_revenue_concentration.sql` §3 → [`30_net_sales_published_vs_corrected.csv`](../outputs/query_results/30_net_sales_published_vs_corrected.csv) |
 
-Two worked examples, both previously in the published top 10 by spend:
+Two worked examples, both previously in the top 10 by spend before the fix:
 
-| Customer | Published as | Reality |
+| Customer | Reported before the fix as | Reality |
 |---|---:|---|
 | 16446 | £168,472 — 4th largest | Invoice 581483 (80,995 units) reversed by C581484 **12 minutes later**. True spend **£2.90** |
 | 12346 | £77,184 — 10th largest | Invoice 541431 (74,215 units) reversed by C541433 **16 minutes later**. True spend **£0.00** |
@@ -64,46 +66,45 @@ at least 30 days. Only customers with 3+ purchase occasions are scored.
 | Number | Value | Source |
 |---|---:|---|
 | Overall median gap between purchases | 28 days | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
-| Historical gaps examined to set the multiple | 11,551 | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
+| Historical gaps examined to set the multiple | 11,452 | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
 | Share of real gaps exceeding 1.5× own median | 22.4% | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
-| **Share exceeding 2× own median** | **11.6%** | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
-| Share exceeding 3× own median | 5.0% | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
+| **Share exceeding 2× own median** | **11.7%** | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
+| Share exceeding 3× own median | 4.9% | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
 | Share exceeding 4× own median | 2.8% | `sql/06_retention_cadence.sql` §1 → [`19_cadence_threshold_evidence.csv`](../outputs/query_results/19_cadence_threshold_evidence.csv) |
-| Invoices collapsed to purchase occasions | 18,532 → 16,763 | `sql/06_retention_cadence.sql` header |
-| Customers with same-day multiple invoices | 697 | `sql/06_retention_cadence.sql` header |
-| Customers suppressed by the 30-day floor | 11 (£67,972) | `sql/06_retention_cadence.sql` §9 → [`28_cadence_censoring_check.csv`](../outputs/query_results/28_cadence_censoring_check.csv) |
+| Invoices collapsed to purchase occasions | 18,366 → 16,657 | `sql/06_retention_cadence.sql` header |
+| Customers with same-day multiple invoices | 680 | `sql/06_retention_cadence.sql` header |
+| Customers suppressed by the 30-day floor | 11 (£61,104) | `sql/06_retention_cadence.sql` §9 → [`28_cadence_censoring_check.csv`](../outputs/query_results/28_cadence_censoring_check.csv) |
 
 ### Before / after
 
-| List | Customers | Revenue | Basis | Source |
+| List | Customers | Revenue | Before the fix | Source |
 |---|---:|---:|---|---|
-| **A.** Old: high-value at risk (90d + £1,000) | 195 | £471,684.33 | published | [`13_customer_segment_summary.csv`](../outputs/query_results/13_customer_segment_summary.csv) |
-| **B.** Old: all at-risk repeat (90d, no spend floor) | 602 | £678,131.91 | published | `sql/07` §4 → [`31_pareto_test.csv`](../outputs/query_results/31_pareto_test.csv) |
-| **C.** New: overdue on own cadence (2×) | 224 | £462,554.75 | published | [`22_cadence_before_after.csv`](../outputs/query_results/22_cadence_before_after.csv) |
-| **C-net.** Same rule, corrected data | **219** | **£427,266.82** | corrected | `sql/11` §0 → [`54_active_vs_lapsed.csv`](../outputs/query_results/54_active_vs_lapsed.csv) |
+| **A.** Old: high-value at risk (90d + £1,000) | 191 | £440,689.14 | 195 / £471,684.33 | [`13_customer_segment_summary.csv`](../outputs/query_results/13_customer_segment_summary.csv) |
+| **B.** Old: all at-risk repeat (90d, no spend floor) | 601 | £647,781.64 | 602 / £678,131.91 | [`22_cadence_before_after.csv`](../outputs/query_results/22_cadence_before_after.csv) |
+| **C.** New: overdue on own cadence (2×) | **219** | **£427,266.82** | 224 / £462,554.75 | [`22_cadence_before_after.csv`](../outputs/query_results/22_cadence_before_after.csv) |
 
-Re-running the cadence rule on corrected data changes the list from 224 to 219,
-with **217 of the same customers**, so the finding holds either way.
+Before the fix the cadence list had 224 customers; on the corrected data it has
+219, **with 217 of the same customers**, so the finding holds either way.
 
 ### Who moved (vs baseline B, like-for-like)
 
 | Movement | Customers | Revenue | Their median gap | Days quiet |
 |---|---:|---:|---:|---:|
-| Dropped by cadence rule | 435 | £431,160.40 | 89.5 | 175.3 |
-| On both lists | 167 | £246,971.51 | 39.1 | 169.8 |
-| Added by cadence rule | 57 | £215,583.24 | 21.6 | 63.4 |
+| Dropped by cadence rule | 436 | £407,188.33 | 89.4 | 175.9 |
+| On both lists | 165 | £240,593.31 | 39.5 | 169.7 |
+| Added by cadence rule | 54 | £186,673.51 | 21.6 | 64.1 |
 
 *Source: `sql/06_retention_cadence.sql` §5 — [`23_cadence_who_moved_vs_all_at_risk.csv`](../outputs/query_results/23_cadence_who_moved_vs_all_at_risk.csv).*
 
-### Who moved (vs baseline A, the 195)
+### Who moved (vs baseline A, the 191)
 
 | Movement | Customers | Revenue |
 |---|---:|---:|
-| Dropped | 109 | £270,666.46 |
-| Added | 138 | £261,536.88 |
-| On both | 86 | £201,017.87 |
+| Dropped | 107 | £245,404.47 |
+| Added | 135 | £231,982.15 |
+| On both | 84 | £195,284.67 |
 
-*Source: `sql/06_retention_cadence.sql` §6 — [`24_cadence_who_moved_vs_195.csv`](../outputs/query_results/24_cadence_who_moved_vs_195.csv).* Only 86 of the original 195 survive.
+*Source: `sql/06_retention_cadence.sql` §6 — [`24_cadence_who_moved_vs_195.csv`](../outputs/query_results/24_cadence_who_moved_vs_195.csv).* Only 84 of the 191 survive.
 
 ### The lead example
 
@@ -113,11 +114,10 @@ them **"High-value active"** and put them on no list at all.
 
 | Basis | Lifetime spend | Median gap | Days silent | Overdue by |
 |---|---:|---:|---:|---:|
-| Published (`vw_customer_cadence`) | £81,024.84 | 7.5 days | 38 | **5.07×** |
-| Corrected (`vw_customer_cadence_net`) | £60,653.40 | 8.0 days | 38 | **4.75×** |
+| Before the fix | £81,024.84 | 7.5 days | 38 | **5.07×** |
+| **Corrected** | £60,653.40 | 8.0 days | 38 | **4.75×** |
 
-Both bases are shown because this document quotes a mix of the two elsewhere;
-the conclusion is the same either way.
+The conclusion is the same either way.
 
 Three others in the same position, all classed "High-value active":
 16729, 16745, 15939.
@@ -132,8 +132,8 @@ Three others in the same position, all classed "High-value active":
 | Single purchase — no cadence | 1,545 | £618,836.25 | [`50_one_time_vs_repeat_value.csv`](../outputs/query_results/50_one_time_vs_repeat_value.csv) |
 | Two purchases — cadence unreliable | 878 | £680,903.63 | [`51_value_ladder_by_purchase_count.csv`](../outputs/query_results/51_value_ladder_by_purchase_count.csv) |
 
-*Corrected basis. On the published basis these read 1,548 / £704,741.62 and
-874 / £869,915.49 ([`27_cadence_too_few_orders.csv`](../outputs/query_results/27_cadence_too_few_orders.csv)). The difference is the reversal fix.*
+*Corrected basis. Before the fix these read 1,548 / £704,741.62 and
+874 / £869,915.49. The difference is the reversal fix.*
 
 ## 4. Q2 — Revenue concentration and exposure
 

@@ -115,3 +115,49 @@ SELECT
     MIN(country)                                    AS country
 FROM online_retail_raw
 GROUP BY invoice_no, (invoice_no LIKE 'C%');
+
+
+-- ============================================================================
+-- vw_valid_sales_net - the headline sales basis
+--
+-- Why this exists:
+--   vw_valid_sales removes cancellation lines (invoice numbers starting with
+--   'C') but NOT the original sale each one reverses, so a fully cancelled
+--   order still counted as revenue. That overstated net sales by GBP 445,875
+--   (5.00%): GBP 8,911,407.90 against GBP 8,465,533.16.
+--
+--   This view removes every sale line that a later cancellation reverses.
+--   Matching rule (exact, so every removed line can be listed and checked):
+--   same customer, same product, same unit price, same quantity, and the
+--   cancellation dated on or after the sale. Sales and customers pages,
+--   cadence and cohort analysis are all built on this view.
+--
+--   vw_valid_sales is kept unchanged as the "before" basis, so the old numbers
+--   and the size of the defect (07_revenue_concentration.sql) stay
+--   reproducible.
+--
+--   Not removed: cancellations that carry a customer ID but match no sale
+--   exactly. Including those raises the overstatement to GBP 611,342, so the
+--   true net sales for identified customers lies between GBP 8,300,066 and
+--   GBP 8,465,533. The headline uses the lower correction because every line
+--   of it is traceable.
+--
+-- Business question answered:
+--   What did customers actually keep, rather than what was invoiced?
+-- ============================================================================
+
+DROP VIEW IF EXISTS vw_valid_sales_net CASCADE;
+
+CREATE VIEW vw_valid_sales_net AS
+SELECT s.*
+FROM vw_valid_sales AS s
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM vw_cancellations AS c
+    WHERE c.customer_id    = s.customer_id
+      AND c.stock_code     = s.stock_code
+      AND c.unit_price     = s.unit_price
+      AND ABS(c.quantity)  = s.quantity
+      AND c.quantity       < 0
+      AND c.invoice_date  >= s.invoice_date
+);

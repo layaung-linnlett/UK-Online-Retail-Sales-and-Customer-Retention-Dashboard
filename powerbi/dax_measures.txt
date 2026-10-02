@@ -14,7 +14,7 @@ right table).
 
 All measures below were checked against the CSVs in outputs/query_results/
 (exported from the SQL views) before being written up here — e.g. Net Sales
-should equal £8,911,407.90, the same figure in
+should equal £8,465,533.16, the same figure in
 outputs/query_results/02_overall_kpis.csv.
 
 KNOWN ISSUES IN THESE MEASURES
@@ -33,20 +33,23 @@ sql/03_clean_views.sql) is one row per invoice for the whole dataset, cancelled
 or not, each carrying a date. Both halves of the fraction are counted from it,
 so the rate is consistent AND filters correctly by month.
 
-STILL PRESENT - Net Sales is not net of returns. vw_valid_sales excludes
+FIXED - Net Sales was not net of returns. vw_valid_sales excludes
 cancellation lines but does not subtract the original orders they reverse, so
-a fully cancelled order is still counted as revenue. The overstatement is
-between GBP 445,875 and GBP 611,342. A corrected view, vw_valid_sales_net,
-exists in sql/07_revenue_concentration.sql but is deliberately NOT what these
-measures use.
+a fully cancelled order was still counted as revenue: GBP 445,875 (5.00%),
+GBP 8,911,407.90 against a true GBP 8,465,533.16.
 
-Why fix one and not the other: the cancellation rate is a self-contained
-metric - correcting it changes one card and one paragraph. Net Sales is the
-denominator of nearly every figure in the README and docs/analysis_summary.md, and
-restating it would mean rewriting the entire analysis rather than disclosing a
-bounded, measured error. docs/analysis_summary.md already carries both bases side by
-side for exactly this reason. Cheap and local: fix it. Expensive and
-cascading: measure it, bracket it, and say so.
+The fix is at the data layer. vw_valid_sales_net (sql/03_clean_views.sql)
+removes every sale line that a later cancellation reverses. In Power BI,
+point the table named vw_valid_sales at the vw_valid_sales_net view (Transform
+data > select the table > Source step > change the view in the Navigation
+step) and keep the table NAME unchanged, so every measure below keeps working
+and only the numbers move. Then Refresh.
+
+What is still not removed: cancellations that carry a customer ID but match no
+sale exactly. Including them would take the overstatement to GBP 611,342, so
+true net sales for identified customers lies between GBP 8,300,066 and
+GBP 8,465,533. The headline uses the lower correction because every line of it
+can be listed and checked.
 
 ----------------------------------------------------------------------------
 Net Sales =
@@ -195,8 +198,8 @@ threshold who HAVE ordered within the last 90 days - the healthy middle of the
 customer base.
 Why CALCULATE: same pattern as the other segment measures.
 Why it matters that this one exists: there are five segments. Without this
-measure the Page 2 KPI row only accounts for 3,494 of 4,338 customers, and the
-844 customers in this segment silently vanish from the page.
+measure the Page 2 KPI row only accounts for 3,477 of 4,327 customers, and the
+850 customers in this segment silently vanish from the page.
 
 ----------------------------------------------------------------------------
 One-Time Customers =
@@ -218,12 +221,12 @@ Page 1 - Sales overview:
   Net Sales, Total Orders, Unique Customers, Average Order Value
 
 Page 2 - Customer retention (five cards, one per segment - they must sum to
-4,338, the same total as Unique Customers on Page 1):
-  High-Value Active Customers      1,399
-  High-Value At-Risk Customers       195
-  Active Repeat Customers            844
-  At-Risk Repeat Customers           407
-  One-Time Customers               1,493
+4,327, the same total as Unique Customers on Page 1):
+  High-Value Active Customers      1,386
+  High-Value At-Risk Customers       191
+  Active Repeat Customers            850
+  At-Risk Repeat Customers           410
+  One-Time Customers               1,490
 
 Page 3 - Cancellations and products:
   Cancelled Invoices    3,836

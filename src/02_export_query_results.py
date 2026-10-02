@@ -94,12 +94,12 @@ MANIFEST = [
 
     # --- 2026 follow-up: revenue concentration (sql/07) -------------------
     ("07_revenue_concentration.sql", 1, "29_reversal_defect_quantified.csv"),
-    ("07_revenue_concentration.sql", 4, "30_net_sales_published_vs_corrected.csv"),
-    ("07_revenue_concentration.sql", 5, "31_pareto_test.csv"),
-    ("07_revenue_concentration.sql", 6, "32_revenue_concentration_curve.csv"),
-    ("07_revenue_concentration.sql", 7, "33_top_10_customers_corrected.csv"),
-    ("07_revenue_concentration.sql", 8, "34_top_10_exposure.csv"),
-    ("07_revenue_concentration.sql", 9, "35_top_10_by_country.csv"),
+    ("07_revenue_concentration.sql", 2, "30_net_sales_published_vs_corrected.csv"),
+    ("07_revenue_concentration.sql", 3, "31_pareto_test.csv"),
+    ("07_revenue_concentration.sql", 4, "32_revenue_concentration_curve.csv"),
+    ("07_revenue_concentration.sql", 5, "33_top_10_customers_corrected.csv"),
+    ("07_revenue_concentration.sql", 6, "34_top_10_exposure.csv"),
+    ("07_revenue_concentration.sql", 7, "35_top_10_by_country.csv"),
 
     # --- 2026 follow-up: first to second purchase (sql/08) ----------------
     ("08_first_to_second_purchase.sql", 3, "36_one_and_done_headline.csv"),

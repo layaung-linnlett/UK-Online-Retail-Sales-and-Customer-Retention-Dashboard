@@ -2,7 +2,7 @@
 -- 04_sales_analysis.sql
 --
 -- What this does:
---   Runs the sales-side analysis queries against vw_valid_sales: overall
+--   Runs the sales-side analysis queries against vw_valid_sales_net (sales net of reversed orders): overall
 --   KPIs, the monthly trend, month-on-month growth (using LAG), top
 --   products, sales by country, and international sales excluding the UK.
 --   These queries are the direct source for Power BI Page 1 (Sales
@@ -22,7 +22,7 @@ SELECT
     COUNT(DISTINCT customer_id) AS unique_customers,
     ROUND(SUM(sales_value) / COUNT(DISTINCT invoice_no), 2) AS average_order_value,
     ROUND(SUM(quantity)::NUMERIC / COUNT(DISTINCT invoice_no), 2) AS average_items_per_order
-FROM vw_valid_sales;
+FROM vw_valid_sales_net;
 
 -- Monthly sales trend
 SELECT
@@ -31,7 +31,7 @@ SELECT
     COUNT(DISTINCT invoice_no) AS orders,
     COUNT(DISTINCT customer_id) AS customers,
     ROUND(SUM(sales_value) / COUNT(DISTINCT invoice_no), 2) AS average_order_value
-FROM vw_valid_sales
+FROM vw_valid_sales_net
 GROUP BY order_month
 ORDER BY order_month;
 
@@ -43,7 +43,7 @@ WITH monthly_sales AS (
     SELECT
         order_month,
         SUM(sales_value) AS net_sales
-    FROM vw_valid_sales
+    FROM vw_valid_sales_net
     GROUP BY order_month
 )
 SELECT
@@ -64,7 +64,7 @@ SELECT
     SUM(quantity) AS units_sold,
     ROUND(SUM(sales_value), 2) AS net_sales,
     COUNT(DISTINCT invoice_no) AS orders
-FROM vw_valid_sales
+FROM vw_valid_sales_net
 GROUP BY product_name
 ORDER BY net_sales DESC
 LIMIT 10;
@@ -75,7 +75,7 @@ SELECT
     ROUND(SUM(sales_value), 2) AS net_sales,
     COUNT(DISTINCT invoice_no) AS orders,
     COUNT(DISTINCT customer_id) AS customers
-FROM vw_valid_sales
+FROM vw_valid_sales_net
 GROUP BY country
 ORDER BY net_sales DESC;
 
@@ -85,7 +85,7 @@ SELECT
     ROUND(SUM(sales_value), 2) AS net_sales,
     COUNT(DISTINCT invoice_no) AS orders,
     ROUND(100.0 * SUM(sales_value) / SUM(SUM(sales_value)) OVER (), 2) AS share_of_international_sales_pct
-FROM vw_valid_sales
+FROM vw_valid_sales_net
 WHERE country <> 'United Kingdom'
 GROUP BY country
 ORDER BY net_sales DESC
@@ -136,7 +136,7 @@ SELECT
     SUM(quantity) AS units_sold,
     ROUND(SUM(sales_value), 2) AS net_sales,
     COUNT(DISTINCT invoice_no) AS orders
-FROM vw_valid_sales
+FROM vw_valid_sales_net
 GROUP BY product_name
 ORDER BY units_sold DESC
 LIMIT 10;
@@ -148,7 +148,7 @@ SELECT
     ROUND(SUM(sales_value), 2) AS net_sales,
     COUNT(DISTINCT invoice_no) AS orders,
     ROUND(SUM(sales_value) / NULLIF(SUM(quantity), 0), 2) AS average_unit_value
-FROM vw_valid_sales
+FROM vw_valid_sales_net
 GROUP BY product_name
 ORDER BY net_sales DESC;
 

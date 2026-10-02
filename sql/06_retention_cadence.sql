@@ -7,9 +7,9 @@
 --   instead of one company-wide number of days.
 --
 --   This file ADDS views. It does not modify vw_customer_profile or the
---   90-day segments in 05_customer_analysis.sql - those stay exactly as
---   they were so the original 195-customer figure remains reproducible and
---   the before/after comparison is honest.
+--   90-day segments in 05_customer_analysis.sql, so the old rule and the new
+--   one are compared on the same data. Both run on vw_valid_sales_net (sales
+--   net of reversed orders): the old rule finds 191 customers, the new one 219.
 --
 --   vw_customer_cadence - one row per customer, with their median gap
 --                         between purchases, how long they have been quiet,
@@ -23,13 +23,13 @@
 -- Key definitions and why they were chosen:
 --
 --   Purchase occasion = a distinct ORDER DATE, not a distinct invoice.
---     697 customers raised more than one invoice on the same day. Counting
+--     680 customers raised more than one invoice on the same day. Counting
 --     those as separate purchases creates zero-day gaps that drag the
 --     median toward zero and make the customer look abandoned the moment
---     they pause. 18,532 invoices collapse to 16,763 purchase occasions.
+--     they pause. 18,366 invoices collapse to 16,657 purchase occasions.
 --
 --   Median, not mean, inter-purchase gap.
---     Gaps are heavily right-skewed (mean 45.7 days vs median 28 days,
+--     Gaps are heavily right-skewed (mean 45.8 days vs median 28 days,
 --     max 366). One long holiday would drag a mean upward and hide a
 --     genuine lapse. The median describes the typical rhythm.
 --
@@ -40,11 +40,11 @@
 --     support.
 --
 --   The multiple: 2x the customer's own median.
---     Chosen empirically, not by assumption. Across all 11,551 historical
+--     Chosen empirically, not by assumption. Across all 11,452 historical
 --     gaps belonging to customers with 2+ gaps, the share of REAL gaps that
 --     exceeded each multiple of that customer's own median was:
---         1.5x -> 22.4%   2.0x -> 11.6%   2.5x -> 7.6%
---         3.0x ->  5.0%   4.0x ->  2.8%
+--         1.5x -> 22.4%   2.0x -> 11.7%   2.5x -> 7.6%
+--         3.0x ->  4.9%   4.0x ->  2.8%
 --     At 1.5x nearly a quarter of ordinary gaps cross the line, so it
 --     signals nothing. 2x means the customer is doing something they
 --     historically only do about 1 time in 9.
@@ -58,8 +58,8 @@
 --   Absolute floor of 30 days.
 --     A guard so a customer with a very short median gap is not flagged
 --     after a single quiet week. Measured, not assumed: without the floor
---     the 2x rule flags 235 customers; with it, 224. The floor therefore
---     suppresses 11 customers holding GBP 67,972 of historical spend -
+--     the 2x rule flags 230 customers; with it, 219. The floor therefore
+--     suppresses 11 customers holding GBP 61,104 of historical spend -
 --     all of them fast-cadence buyers quiet for under 30 days. It is a
 --     safety rail that removes about 5% of the raw flags, not a driver of
 --     the result.
@@ -81,12 +81,12 @@ DROP VIEW IF EXISTS vw_customer_cadence CASCADE;
 CREATE VIEW vw_customer_cadence AS
 WITH dataset_end AS (
     SELECT MAX(order_date) AS dataset_end_date
-    FROM vw_valid_sales
+    FROM vw_valid_sales_net
 ),
 -- One row per customer per DAY they bought, collapsing same-day invoices.
 purchase_occasions AS (
     SELECT DISTINCT customer_id, order_date
-    FROM vw_valid_sales
+    FROM vw_valid_sales_net
 ),
 -- LAG() reads the previous purchase date within the same customer, so each
 -- row can be compared with the one before it without collapsing the rows.
@@ -119,7 +119,7 @@ customer_summary AS (
         COUNT(DISTINCT v.invoice_no)             AS total_invoices,
         SUM(v.quantity)                          AS total_items,
         ROUND(SUM(v.sales_value), 2)             AS total_spend
-    FROM vw_valid_sales AS v
+    FROM vw_valid_sales_net AS v
     GROUP BY v.customer_id
 )
 SELECT
@@ -164,7 +164,7 @@ LEFT JOIN cadence AS c ON c.customer_id = cs.customer_id;
 --    This is the query that justifies the threshold. Run it when challenged.
 -- ----------------------------------------------------------------------------
 WITH purchase_occasions AS (
-    SELECT DISTINCT customer_id, order_date FROM vw_valid_sales
+    SELECT DISTINCT customer_id, order_date FROM vw_valid_sales_net
 ),
 gaps AS (
     SELECT customer_id,
@@ -227,7 +227,7 @@ ORDER BY total_spend DESC;
 -- ----------------------------------------------------------------------------
 -- 4. BEFORE / AFTER - headline comparison against both 90-day baselines
 --
---    Baseline A: 'High-value at risk' (195) = 2+ orders AND spend >= 1000
+--    Baseline A: 'High-value at risk' (191) = 2+ orders AND spend >= 1000
 --                AND quiet > 90 days. This is the README headline.
 --    Baseline B: all at-risk repeat customers (602) = 2+ orders AND quiet
 --                > 90 days, with no spend floor. This is the like-for-like
@@ -279,7 +279,7 @@ ORDER BY total_spend DESC;
 
 
 -- ----------------------------------------------------------------------------
--- 6. WHO MOVED - against baseline A, the 195 README headline list
+-- 6. WHO MOVED - against baseline A, the 191 old-rule list
 -- ----------------------------------------------------------------------------
 WITH old_list AS (
     SELECT customer_id FROM vw_customer_profile
