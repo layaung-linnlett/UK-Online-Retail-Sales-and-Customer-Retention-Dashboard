@@ -46,10 +46,12 @@ step) and keep the table NAME unchanged, so every measure below keeps working
 and only the numbers move. Then Refresh.
 
 What is still not removed: cancellations that carry a customer ID but match no
-sale exactly. Including them would take the overstatement to GBP 611,342, so
-true net sales for identified customers lies between GBP 8,300,066 and
-GBP 8,465,533. The headline uses the lower correction because every line of it
-can be listed and checked.
+sale exactly. Including them would take the overstatement to GBP 611,342.
+The matching rule also over-removes by about GBP 42,391 (0.5%), because one
+cancellation reverses one line but every matching line is removed. True net
+sales for identified customers lies between GBP 8,300,066 and GBP 8,507,925;
+the headline GBP 8,465,533 sits inside that range and every line of it can be
+listed and checked.
 
 ----------------------------------------------------------------------------
 Net Sales =

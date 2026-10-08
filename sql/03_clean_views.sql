@@ -137,10 +137,13 @@ GROUP BY invoice_no, (invoice_no LIKE 'C%');
 --   reproducible.
 --
 --   Not removed: cancellations that carry a customer ID but match no sale
---   exactly. Including those raises the overstatement to GBP 611,342, so the
---   true net sales for identified customers lies between GBP 8,300,066 and
---   GBP 8,465,533. The headline uses the lower correction because every line
---   of it is traceable.
+--   exactly. Including those raises the overstatement to GBP 611,342.
+--   Separately, the rule is many-to-many: it removes every sale line that
+--   matches a cancellation, though one cancellation reverses one line, so it
+--   over-removes by about GBP 42,391 (0.5%). True net sales for identified
+--   customers therefore lies between GBP 8,300,066 and GBP 8,507,925; the
+--   headline GBP 8,465,533 sits inside that range and every line of it is
+--   traceable.
 --
 -- Business question answered:
 --   What did customers actually keep, rather than what was invoiced?

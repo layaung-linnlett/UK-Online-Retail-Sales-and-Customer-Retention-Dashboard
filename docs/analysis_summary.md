@@ -173,7 +173,7 @@ Three others in the same position, all classed "High-value active":
 | Silent at day 180 → still eventually returned | 42.9% | `sql/08` §5 → [`41_return_probability_by_day.csv`](../outputs/query_results/41_return_probability_by_day.csv) |
 | Revenue held in one-and-done first orders | £618,836.25 | `sql/08` §6 → [`42_one_and_done_revenue.csv`](../outputs/query_results/42_one_and_done_revenue.csv) |
 
-**The true one-and-done rate is ~18%, not 34%.** **The second purchase takes
+**The true one-and-done rate is ~18%, not 36%.** **The second purchase takes
 2.6× longer than every purchase after it.** **There is no cliff**: the decay is
 smooth; the crossover to "more likely gone than returning" is around day 150.
 
@@ -363,7 +363,8 @@ quantity, with the cancellation dated on or after the sale. The source data has 
 field linking a cancellation to the order it reverses. **Partial cancellations and
 price-adjusted returns are not caught**, so £445,874.74 is a floor on the
 overstatement, not a complete figure. Conversely, a customer who genuinely bought
-the same item twice at the same price and cancelled once could be over-corrected.
+the same item twice at the same price and cancelled once is over-corrected: both lines are
+removed. The size of that effect is measured below (£42,391, 0.5% of net sales).
 
 **The match has no time limit**, which is the weakest part of it: a sale in
 January matched against a cancellation in November is treated the same as one
@@ -391,9 +392,14 @@ The overstatement is therefore bracketed, not pinned:
 | Upper bound | £611,342.09 | All cancellations carrying a customer ID |
 | **Measured fix** | **£445,874.74** | Sale lines positively matched to a specific reversal |
 | Unmatched | £207,858.81 (6,088 lines) | No exact match — partial and price-adjusted returns |
+| Matched (cancellation value) | £403,483.28 | Upper bound less unmatched: what the matched cancellations are actually worth |
+| **Over-removal** | **£42,391.46 (0.5%)** | Measured fix less matched value: sale lines removed because an identical line was reversed, not because each had its own cancellation |
 
-**True net sales for identified customers is between £8,300,066 and £8,465,533.**
-`vw_valid_sales_net` takes the conservative end. The README's earlier estimate of
+**True net sales for identified customers is between £8,300,066 and £8,507,925.**
+(£8,507,925 is the reported £8,911,408 less the £403,483 of cancellations that matched a sale,
+that is, what one-to-one matching would give.) `vw_valid_sales_net` sits inside the range, at
+£8,465,533; it is not the conservative end, because many-to-many matching over-removes by
+£42,391 (0.5%). It has not been rebuilt on one-to-one matching. The README's earlier estimate of
 £611,342 is the upper bound and reconciles exactly, being the same quantity
 measured a different way, not a contradiction.
 

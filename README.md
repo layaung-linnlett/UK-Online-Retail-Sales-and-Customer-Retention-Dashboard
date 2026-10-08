@@ -53,7 +53,7 @@ order; Power BI connects to the views and holds fourteen DAX measures.
 | Excluded | Rows | Reason |
 |---|---:|---|
 | Cancellation invoices (prefix `C`) | 3,836 invoices | Analysed separately rather than deleted |
-| Non-positive quantity | 10,624 | Adjustments, write-offs, samples — not sales |
+| Non-positive quantity | 10,624 | 9,288 are the cancellation lines above; the other 1,336 are adjustments, write-offs and samples — not sales |
 | Non-positive price | 2,521 | Same |
 | No customer ID | 135,080 (24.93%) | Cannot be attributed to a customer |
 
@@ -125,7 +125,8 @@ before acting on it.
 
 ### 3. The repeat-purchase problem is half the size it appears
 
-**Observation.** 34% of customers appear to buy only once (1,490 of 4,327).
+**Observation.** 35.7% of customers appear to buy only once (1,545 of 4,327 bought on a
+single day; counted by invoice it is 34.4%, 1,490, the "One-time customer" segment).
 Given a fair 270-day window in which to return, the rate is 17.9%.
 
 **Insight.** The naive rate counts a customer who first bought in November as a
@@ -299,9 +300,18 @@ sales, customer, cadence and cohort query now runs on it.
 
 **What is not fixed.** Cancellations that carry a customer ID but match no sale
 exactly are not removed, because they cannot be tied to a specific line.
-Including them would raise the correction to £611,342, so true net sales for
-identified customers lies between £8,300,066 and £8,465,533. The headline uses
-the lower correction because every line of it can be listed and checked.
+Including them would raise the correction to £611,342, which sets the low end of the range.
+
+**What is over-fixed.** The matching rule removes *every* sale line that matches a
+cancellation, but one cancellation can only reverse one line. If a customer bought the same
+item twice at the same price and cancelled once, both lines are removed. The cancellations
+that did match are worth £403,483 (£611,342 less the £207,859 unmatched), while the sale
+lines removed are worth £445,875: about **£42,000, or 0.5% of net sales**, removed that
+should not have been. Correcting it would put net sales near £8,507,925.
+
+True net sales for identified customers therefore lies between **£8,300,066 and
+£8,507,925**. The headline £8,465,533 sits inside that range, and every line of it can be
+listed and checked. It has not been rebuilt on one-to-one matching.
 
 ### Measured, not fixed: the sales totals exclude rows they did not need to
 
